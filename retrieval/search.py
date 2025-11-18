@@ -1,6 +1,6 @@
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_core.vectorstores import VectorStoreRetriever
 
@@ -21,6 +21,11 @@ class Search:
         loader = TextLoader(SPEECH_TXT_PATH)
         documents = loader.load()
 
+        # print for debugging/verifying
+        print("Text loaded:")
+        for i, doc in enumerate(documents, 1):
+            print(f"Doc {i}. {doc.page_content}")
+
         # split into chunks
         text_splitter = CharacterTextSplitter(
             separator=".", 
@@ -32,17 +37,27 @@ class Search:
 
         docs_chunks = text_splitter.split_documents(documents)
 
+        # print for debugging/verifying
+        print(f"Chunked text document into {len(docs_chunks)}")
+        for i, chunk in enumerate(docs_chunks, 1):
+            print(f"Chunk {i}. {chunk.page_content}")
+
         # create vector store
         CHROMA_DIR_PATH.mkdir(parents=True, exist_ok=True)
         vector_store = Chroma.from_documents(documents=docs_chunks, embedding=self.model, 
                                              collection_name="ambedkar-gpt",
                                              persist_directory=str(CHROMA_DIR_PATH))
+        print("Created vector store!!")
         # retriever
         vector_store_retriever = vector_store.as_retriever(search_type="similarity",
                                                            search_kwargs={"k": 5})
         self.retriever = vector_store_retriever
+        return
 
     def load_or_create_vector_db(self):
         if self.retriever is None:
+            print("Building a Chroma DB, getting a Retriever...")
             self.build_vector_db()
+        
+        print("Loading in-memory vector db...")
         return self.retriever

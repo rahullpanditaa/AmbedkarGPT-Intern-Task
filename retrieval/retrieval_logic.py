@@ -2,21 +2,19 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
+from langchain_core.vectorstores import VectorStoreRetriever
 from .search_utils import (
     SPEECH_TXT_PATH, 
     DATA_DIR_PATH,
     CHROMA_DIR_PATH
 )
 
-class Search:
-    chunks_metadata: list[dict]
 
+class Search:
     def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
         self.model = HuggingFaceEmbeddings(model_name=model_name)
-        # self.chunk_embeddings = None
-        self.chunks_metadata = []
 
-    def build_vector_db(self):
+    def build_vector_db(self) -> VectorStoreRetriever:
         # load text
         DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
         loader = TextLoader(SPEECH_TXT_PATH)
@@ -33,13 +31,12 @@ class Search:
 
         docs_chunks = text_splitter.split_documents(documents)
 
-        chunk_texts = []
-        for chunk in docs_chunks:
-            self.chunks_metadata.append(chunk.metadata)
-            chunk_texts.append(chunk.page_content)
-
         # create vector store
         CHROMA_DIR_PATH.mkdir(parents=True, exist_ok=True)
         vector_store = Chroma.from_documents(documents=docs_chunks, embedding=self.model, 
                                              collection_name="ambedkar-gpt",
                                              persist_directory=str(CHROMA_DIR_PATH))
+        # retriever
+        vector_store_retriever = vector_store.as_retriever(search_type="similarity",
+                                                           search_kwargs={"k": 5})
+        return vector_store_retriever

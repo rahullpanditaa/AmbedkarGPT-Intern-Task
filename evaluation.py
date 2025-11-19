@@ -1,7 +1,15 @@
+import json
 from lib.rag_chain import create_rag_chain_for_config
 from lib.search_utils import load_test_dataset
 from langchain_core.documents import Document
 from pathlib import Path
+
+CHUNK_CONFIGS = {
+    "small":  {"chunk_size": 250, "chunk_overlap": 150},
+    "medium": {"chunk_size": 550, "chunk_overlap": 150},
+    "large":  {"chunk_size": 900, "chunk_overlap": 150},
+}
+
 
 def evaluate_config(cfg_name, config):
     rag_chain, retriever = create_rag_chain_for_config(
@@ -46,4 +54,17 @@ def evaluate_config(cfg_name, config):
 
     return results
 
+def evaluate_results():
+    final_results = {}
 
+    for name, cfg in CHUNK_CONFIGS.items():
+        print(f"\n- Evaluating chunking strategy - '{name.upper()}', (Chunk overlap: {cfg['chunk_overlap']}):")
+        results = evaluate_config(name, cfg)
+        # dict where key = chunking strategy name, value = results
+        final_results[name] = results
+
+    # save results
+    with open("test_results.json", "w") as f:
+        json.dump(final_results, f, indent=2)
+
+    print("\n- Saved evaluation results to 'test_results.json'")

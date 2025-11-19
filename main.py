@@ -3,8 +3,8 @@ from lib.rag_chain import create_rag_chain
 
 def main():
     chain = create_rag_chain()
-    print("Welcome to AmbedkarGPT.")
-    print("Starting REPL...")
+    print(" - Welcome to AmbedkarGPT.")
+    print(" - Starting REPL...\n")
     while True:
         question = input("> ")
         if question.lower() == "exit":

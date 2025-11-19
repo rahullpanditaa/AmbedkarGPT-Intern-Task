@@ -65,7 +65,7 @@ class SemanticSearch:
             vs = Chroma(collection_name="ambedkar-corpu", 
                         embedding_function=self.model, 
                         persist_directory=str(self.persist_dir))
-            print(" - Vector store loaded!!")
+            print(" - vector store loaded.")
             return vs.as_retriever(search_type="similarity", search_kwargs={"k":5})
         else:
             retriever = self.build_vector_db()

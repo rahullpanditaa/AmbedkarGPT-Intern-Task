@@ -10,7 +10,7 @@ wheels/
 .venv
 
 # vector-db
-vector_db/
+vector_dbs/
 
 # UV lockfile
 uv.lock

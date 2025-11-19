@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
@@ -24,3 +25,18 @@ Provide an answer that addresses the question:""")
 
 def combine_docs(docs: list[Document]) -> str:
     return "\n\n".join(doc.page_content for doc in docs)
+
+CHUNK_CONFIGS = {
+    "small":  {"chunk_size": 250, "chunk_overlap": 150},
+    "medium": {"chunk_size": 550, "chunk_overlap": 150},
+    "large":  {"chunk_size": 900, "chunk_overlap": 150},
+}
+
+def load_test_dataset() -> list[dict]:
+    dataset = Path("test_dataset.json").resolve()
+    with open(dataset, "r") as f:
+        data = json.load(f)
+
+    # return a list of dicts, 
+    # each dict - {id, question, truth, source, ques_type, answerable}
+    return data["test_questions"]

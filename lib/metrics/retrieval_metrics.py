@@ -9,16 +9,16 @@ def calculate_retrieval_metrics(k: int=5):
         expected_sources = result["expected_docs_txt_files"]
         retrieved_sources = result["retrieved_docs_txt_files"]
         hit_rate = _calculate_hit_rate(expected_sources=expected_sources,
-                                      retrieved_sources=retrieved_sources)
+                                      retrieved_sources=retrieved_sources) if result["answerable"] else None
         
         precision_score = _calculate_precision_score(expected_sources=expected_sources,
-                                                    retrieved_sources=retrieved_sources)
+                                                    retrieved_sources=retrieved_sources) if result["answerable"] else None
         mrr = _calculate_mrr(expected_sources=expected_sources,
-                            retrieved_sources=retrieved_sources)
+                            retrieved_sources=retrieved_sources) if result["answerable"] else None
         new_result = result.copy()
-        new_result["hit_rate"] = hit_rate if result["answerable"] else None
-        new_result[f"precision_at_{k}"] = precision_score if result["answerable"] else None
-        new_result["mrr"] = mrr if result["answerable"] else None
+        new_result["hit_rate"] = hit_rate
+        new_result[f"precision_at_{k}"] = precision_score
+        new_result["mrr"] = mrr
 
         results_with_metrics.append(new_result)
 

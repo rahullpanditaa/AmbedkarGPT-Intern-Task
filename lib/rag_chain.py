@@ -3,10 +3,11 @@ from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from .search_utils import combine_docs, PROMPT
 from .search import SemanticSearch
 
-def create_rag_chain():
-    # invoke llm
-    llm = OllamaLLM(model="mistral")
 
+# invoke llm    
+llm = OllamaLLM(model="mistral")
+
+def create_rag_chain():
     # get retriever
     searcher = SemanticSearch()
     retriever = searcher.load_or_create_vector_db()

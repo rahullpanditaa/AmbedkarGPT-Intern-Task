@@ -10,12 +10,12 @@ CHROMA_DIR_PATH = Path(__file__).parent.parent.resolve() / "vector_db"
 
 PROMPT = ChatPromptTemplate.from_template("""Answer the question based on the provided context,
     
-    Question: {question}
+Question: {question}
 
 Context: 
 {context}
 
 Provide an answer that addresses the question:""")
 
-def combine_docs(docs: list[Document]):
+def combine_docs(docs: list[Document]) -> str:
     return "\n\n".join(doc.page_content for doc in docs)

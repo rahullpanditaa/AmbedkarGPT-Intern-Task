@@ -12,9 +12,8 @@ from .search_utils import (
 class SemanticSearch:    
     def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
         self.model = HuggingFaceEmbeddings(model_name=model_name)
-        self.retriever = None
 
-    def build_vector_db(self):
+    def build_vector_db(self) -> VectorStoreRetriever:
         # load text
         DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
         loader = TextLoader(SPEECH_TXT_PATH)
@@ -37,19 +36,22 @@ class SemanticSearch:
                                              embedding=self.model,
                                              collection_name="ambedkar-gpt",                                             
                                              persist_directory=str(CHROMA_DIR_PATH))
+        print("Building a ChromaDB...")
         print("Created vector store!!")
         # retriever
         vector_store_retriever = vector_store.as_retriever(search_type="similarity",
                                                            search_kwargs={"k": 5})
-        self.retriever = vector_store_retriever
+        return vector_store_retriever
 
     def load_or_create_vector_db(self) -> VectorStoreRetriever:
         if CHROMA_DIR_PATH.exists() and (CHROMA_DIR_PATH / "chroma.sqlite3").exists():
+            print("Loading vector store from disk...")
             # load db
             vs = Chroma(collection_name="ambedkar-gpt", 
                         embedding_function=self.model, 
-                        persist_directory=CHROMA_DIR_PATH)
-            self.retriever = vs.as_retriever(search_type="similarity", search_kwargs={"k":5})
+                        persist_directory=str(CHROMA_DIR_PATH))
+            return vs.as_retriever(search_type="similarity", search_kwargs={"k":5})
         else:
-            self.build_vector_db()
-        return self.retriever
+            retriever = self.build_vector_db()
+            return retriever
+        

@@ -9,11 +9,18 @@ from .search_utils import (
     CHROMA_DIR_PATH
 )
 
-class SemanticSearch:    
+class SemanticSearch: 
+    """
+    Semantic Search component used to build or load a local vector database for 
+    Retrieval-Augmented Generation.
+    """
+
     def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
         self.model = HuggingFaceEmbeddings(model_name=model_name)
 
     def build_vector_db(self) -> VectorStoreRetriever:
+        """Creates a Chroma vector DB from scratch, returns its retriever."""
+
         # load text
         DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
         loader = TextLoader(SPEECH_TXT_PATH)
@@ -36,7 +43,7 @@ class SemanticSearch:
                                              embedding=self.model,
                                              collection_name="ambedkar-gpt",                                             
                                              persist_directory=str(CHROMA_DIR_PATH))
-        print(" - Building a ChromaDB...")
+        print("\n - Building a ChromaDB...")
         print(" - Created vector store!!\n")
         # retriever
         vector_store_retriever = vector_store.as_retriever(search_type="similarity",
@@ -44,8 +51,10 @@ class SemanticSearch:
         return vector_store_retriever
 
     def load_or_create_vector_db(self) -> VectorStoreRetriever:
+        """Loads an existing Chroma DB if available; otherwise, builds a new one."""
+
         if CHROMA_DIR_PATH.exists() and (CHROMA_DIR_PATH / "chroma.sqlite3").exists():
-            print(" - Loading vector store from disk...\n")
+            print("\n - Loading vector store from disk...\n")
             # load db
             vs = Chroma(collection_name="ambedkar-gpt", 
                         embedding_function=self.model, 

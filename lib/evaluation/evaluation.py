@@ -1,6 +1,6 @@
 import json
 from lib.rag_chain import create_rag_chain_for_config
-from lib.search_utils import load_test_dataset
+from lib.search.search_utils import load_test_dataset
 from langchain_core.documents import Document
 from pathlib import Path
 

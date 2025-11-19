@@ -1,7 +1,7 @@
 from langchain_ollama import OllamaLLM
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-from .search_utils import combine_docs, PROMPT, CHROMA_DIRS_PATH
-from .search import SemanticSearch
+from .search.search_utils import combine_docs, PROMPT, CHROMA_DIRS_PATH
+from .search.search import SemanticSearch
 
 
 # initialize Ollama LLM   

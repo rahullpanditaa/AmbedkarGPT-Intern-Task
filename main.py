@@ -1,7 +1,9 @@
-from retrieval.rag_chain import create_rag_chain
+from lib.rag_chain import create_rag_chain
 
 
 def main():
+    print("Welcome to AmbedkarGPT!!")
+    print("Starting REPL...")
     while True:
         question = input("> ")
         if question.lower() == "exit":

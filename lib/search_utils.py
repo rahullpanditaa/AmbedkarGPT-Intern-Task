@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 DATA_DIR_PATH = Path(__file__).parent.parent.resolve() / "data"
 SPEECH_TXT_PATH = DATA_DIR_PATH / "speech.txt"
 
-CHROMA_DIR_PATH = Path(__file__).parent.resolve() / "chroma_vector_db"
+CHROMA_DIR_PATH = Path(__file__).parent.parent.resolve() / "vector_db"
 
 PROMPT = ChatPromptTemplate.from_template("""Answer the question based on the provided context,
     

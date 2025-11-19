@@ -1,14 +1,14 @@
 from langchain_ollama import OllamaLLM
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from .search_utils import combine_docs, PROMPT
-from .search import Search
+from .search import SemanticSearch
 
 def create_rag_chain():
     # invoke llm
     llm = OllamaLLM(model="mistral")
 
     # get retriever
-    searcher = Search()
+    searcher = SemanticSearch()
     retriever = searcher.load_or_create_vector_db()
 
     # runnable that converts list[docs] into a string for llm

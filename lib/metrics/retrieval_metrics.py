@@ -33,4 +33,10 @@ def calculate_precision_score(expected_sources: list[str], retrieved_sources: li
     return relevant_retrieved / len(retrieved_sources)
 
 def calculate_mrr(expected_sources: list[str], retrieved_sources: list[str]):
-    ...
+    rank = 0
+    for i, retrieved in enumerate(retrieved_sources, 1):
+        if retrieved in expected_sources:
+            rank = i
+            return 1 / rank
+    return 0
+

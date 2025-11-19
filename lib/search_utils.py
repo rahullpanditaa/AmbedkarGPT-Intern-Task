@@ -2,9 +2,11 @@ from pathlib import Path
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 
-
 DATA_DIR_PATH = Path(__file__).parent.parent.resolve() / "data"
-SPEECH_TXT_PATH = DATA_DIR_PATH / "speech.txt"
+# SPEECH_TXT_PATH = DATA_DIR_PATH / "speech.txt"
+
+
+
 
 CHROMA_DIR_PATH = Path(__file__).parent.parent.resolve() / "vector_db"
 

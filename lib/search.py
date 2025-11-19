@@ -1,4 +1,5 @@
 from langchain_community.document_loaders import TextLoader
+from langchain_core.documents import Document
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
@@ -23,8 +24,15 @@ class SemanticSearch:
 
         # load text
         DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
-        loader = TextLoader(SPEECH_TXT_PATH)
-        documents = loader.load()
+        # loader = TextLoader(SPEECH_TXT_PATH)
+        # documents = loader.load()
+
+        # load all 6 files
+        all_docs: list[Document] = []
+        for i in range(1,7):
+            doc = TextLoader(DATA_DIR_PATH / f"speech{i}.txt").load()
+            all_docs.extend(doc)
+        
 
         # split into chunks
         text_splitter = CharacterTextSplitter(

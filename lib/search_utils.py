@@ -3,12 +3,15 @@ from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 
 DATA_DIR_PATH = Path(__file__).parent.parent.resolve() / "data"
-# SPEECH_TXT_PATH = DATA_DIR_PATH / "speech.txt"
 
+CHROMA_DIRS_PATH = Path(__file__).parent.parent.resolve() / "vector_dbs"
+PERSIST_DIR_SMALL = "vector_db_small"
+PERSIST_DIR_MEDIUM = "vector_db_medium"
+PERSIST_DIR_LARGE = "vector_db_large"
 
-
-
-CHROMA_DIR_PATH = Path(__file__).parent.parent.resolve() / "vector_db"
+CHUNK_SIZE_SMALL = 250
+CHUNK_SIZE_MEDIUM = 550
+CHUNK_SIZE_LARGE = 900
 
 PROMPT = ChatPromptTemplate.from_template("""Answer the question based on the provided context,
     

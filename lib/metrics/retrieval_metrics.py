@@ -7,8 +7,8 @@ CHUNK_CONFIGS = {
 }
 
 
-def calculate_retrieval_metrics(config_name: str):
-    results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
+def calculate_retrieval_metrics(config_name: str, results: list[dict]):
+    # results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
 
     results_with_metrics = []
     

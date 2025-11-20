@@ -3,6 +3,11 @@ from lib.rag_chain import create_rag_chain_for_config
 from lib.search.search_utils import load_test_dataset
 from langchain_core.documents import Document
 from pathlib import Path
+from metrics.retrieval_metrics import calculate_retrieval_metrics
+from metrics.answer_quality_metrics import calculate_answer_quality_metrics
+from metrics.semantic_metrics import calculate_semantic_metrics
+
+TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
 
 CHUNK_CONFIGS = {
     "small":  {"chunk_size": 250, "chunk_overlap": 150},
@@ -54,17 +59,34 @@ def evaluate_config(cfg_name, config):
 
     return results
 
-def evaluate_results():
+# def evaluate_results():
+#     final_results = {}
+
+#     for name, cfg in CHUNK_CONFIGS.items():
+#         print(f"\n- Evaluating chunking strategy - '{name.upper()}', (Chunk overlap: {cfg['chunk_overlap']}).")
+#         results = evaluate_config(name, cfg)
+#         # dict where key = chunking strategy name, value = results
+#         final_results[name] = results
+
+#     # save results
+#     with open(TEST_RESULTS_PATH, "w") as f:
+#         json.dump(final_results, f, indent=2)
+
+#     print("\n- Saved evaluation results to 'test_results.json'")
+
+def complete_evaluation():
     final_results = {}
 
     for name, cfg in CHUNK_CONFIGS.items():
-        print(f"\n- Evaluating chunking strategy - '{name.upper()}', (Chunk overlap: {cfg['chunk_overlap']}):")
+        print(f"\n- Evaluating chunking strategy - '{name.upper()}', (Chunk overlap: {cfg['chunk_overlap']}).")
         results = evaluate_config(name, cfg)
-        # dict where key = chunking strategy name, value = results
-        final_results[name] = results
+        # now, calculate all evaluation metrics
+        r = calculate_retrieval_metrics(config_name=name, results=results)
+        r = calculate_answer_quality_metrics(config_name=name, results=r)
+        r = calculate_semantic_metrics(config_name=name, results=r)
+        final_results[name] = r
 
-    # save results
-    with open("test_results.json", "w") as f:
+    with open(TEST_RESULTS_PATH, "w") as f:
         json.dump(final_results, f, indent=2)
 
-    print("\n- Saved evaluation results to 'test_results.json'")
+    print("\n- Saved evaluation results to 'data/test_results.json'")

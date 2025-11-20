@@ -3,8 +3,8 @@ from pathlib import Path
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 
-DATA_DIR_PATH = Path(__file__).parent.parent.resolve() / "data"
-CHROMA_DIRS_PATH = Path(__file__).parent.parent.resolve() / "vector_dbs"
+DATA_DIR_PATH = Path(__file__).parent.parent.parent.resolve() / "data"
+CHROMA_DIRS_PATH = Path(__file__).parent.parent.parent.resolve() / "vector_dbs"
 PERSIST_DIR_SMALL = "vector_db_small"
 PERSIST_DIR_MEDIUM = "vector_db_medium"
 PERSIST_DIR_LARGE = "vector_db_large"

@@ -1,8 +1,9 @@
 from evaluation.evaluation import evaluate_config
 from rouge_score import rouge_scorer
-from ragas.metrics import answer_relevancy
+from ragas.metrics import answer_relevancy, faithfulness
 from ragas import evaluate
 from datasets import Dataset
+\
 
 def calculate_answer_quality_metrics():
     ...
@@ -28,13 +29,30 @@ def calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
 # answer relevance - check whether the generated answer is
 # actually about the question i.e semantic alignment b/w
 # question and answer
-def calculate_answer_relevance(result: dict):
+def calculate_answer_relevance(result: dict) -> float:
     data = {
         "question": [result["question"]],
         "answer": [result["generated_answer"]],
         "contexts": [result["contexts"]]
     }
     dataset = Dataset.from_dict(data)
-    score = evaluate(dataset=dataset, metrics=[answer_relevancy])
+    result = evaluate(dataset=dataset, metrics=[answer_relevancy])
     
-    return score["answer_relevancy"]
+    return float(result["answer_relevancy"])
+
+# faithfulness - check for hallucinations. Factual consistence
+# of response relative to the retrieved context
+# response considered faithful if all claims in it can be 
+# supported by retrieved docs
+def calculate_answer_faithfulness(result: dict):
+    data = {
+        "question": [result["question"]],
+        "answer": [result["generated_answer"]],
+        "contexts": [result["contexts"]]
+    }
+
+    dataset = Dataset.from_dict(data)
+    result = evaluate(dataset, metrics=[faithfulness])
+
+    return float(result["faithfulness"])
+

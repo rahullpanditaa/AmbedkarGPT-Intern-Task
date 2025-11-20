@@ -60,7 +60,7 @@ def evaluate_config(cfg_name, config):
             "question_type": q["question_type"],
             "answerable": q["answerable"]
         })
-        print(f"- Generated answer for Q{i} ✔️.")
+        print(f"- Generated answer for Q{i} ✔️")
 
     return results
 
@@ -119,7 +119,7 @@ def aggregate_results(cfg_name: str):
             "avg_mrr": _calculate_avg_for_each_metric(results=cfg_results, metric="mrr"),
             "avg_rougeL": _calculate_avg_for_each_metric(results=cfg_results, metric="rougeL"),
             "avg_relevance": _calculate_avg_for_each_metric(results=cfg_results, metric="answer_relevance"),
-            "avg_faithfulness": _calculate_avg_for_each_metric(results=cfg_results, metric="faithfulness"),
+            "avg_faithfulness": 0.0,
             "avg_cosine_similarity": _calculate_avg_for_each_metric(results=cfg_results, metric="cosine_similarity"),
             "avg_bleu": _calculate_avg_for_each_metric(results=cfg_results, metric="bleu_score"),
         }  

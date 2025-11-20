@@ -15,7 +15,8 @@ CHUNK_CONFIGS = {
 }
 
 HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-LLM = OllamaLLM(model="mistral")
+# LLM = OllamaLLM(model="mistral")
+LLM = OllamaLLM(model="deepseek-r1:1.5b")
 
 def calculate_answer_quality_metrics(results: list[dict]):
     # results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
@@ -30,7 +31,10 @@ def calculate_answer_quality_metrics(results: list[dict]):
         
         ans_relevance = _calculate_answer_relevance(result=result) if result["answerable"] else None
         
-        ans_faithfulness = _calculate_answer_faithfulness(result=result) if result["answerable"] else None
+        # ans_faithfulness = _calculate_answer_faithfulness(result=result) if result["answerable"] else None
+
+        # temporarily disable
+        ans_faithfulness = None
 
         new_result = result.copy()
         new_result["rougeL"] = rougeL
@@ -88,27 +92,27 @@ def _calculate_answer_relevance(result: dict) -> float:
 # of response relative to the retrieved context
 # response considered faithful if all claims in it can be 
 # supported by retrieved docs
-def _calculate_answer_faithfulness(result: dict):
-    if result["generated_answer"].strip() == "":
-        return 0.0
-    data = {
-        "question": [result["question"]],
-        "answer": [result["generated_answer"]],
-        "contexts": [result["contexts"]]
-    }
+# def _calculate_answer_faithfulness(result: dict):
+#     if result["generated_answer"].strip() == "":
+#         return 0.0
+#     data = {
+#         "question": [result["question"]],
+#         "answer": [result["generated_answer"]],
+#         "contexts": [result["contexts"]]
+#     }
 
-    dataset = Dataset.from_dict(data)
-    # llm = OllamaLLM(model="deepseek-r1:1.5b")
-    # llm = OllamaLLM(model="mistral")
-    scores = evaluate(dataset, 
-                      metrics=[faithfulness], 
-                      llm=LLM,
-                      embeddings=HF_EMBEDDING,
-                      show_progress=True)
+#     dataset = Dataset.from_dict(data)
+#     # llm = OllamaLLM(model="deepseek-r1:1.5b")
+#     # llm = OllamaLLM(model="mistral")
+#     scores = evaluate(dataset, 
+#                       metrics=[faithfulness], 
+#                       llm=LLM,
+#                       embeddings=HF_EMBEDDING,
+#                       show_progress=True)
 
-    time.sleep(15.0)
+#     time.sleep(15.0)
 
-    # return float(scores["faithfulness"])
-    return float(scores.scores[0]["faithfulness"])
+#     # return float(scores["faithfulness"])
+#     return float(scores.scores[0]["faithfulness"])
 
 

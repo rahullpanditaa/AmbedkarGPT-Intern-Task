@@ -1,8 +1,11 @@
-from evaluation.evaluation import evaluate_config
+# from lib.evaluation.evaluation import evaluate_config
 from rouge_score import rouge_scorer
 from ragas.metrics import answer_relevancy, faithfulness
 from ragas import evaluate
 from datasets import Dataset
+from langchain_ollama import OllamaLLM
+
+
 
 CHUNK_CONFIGS = {
     "small":  {"chunk_size": 250, "chunk_overlap": 150},
@@ -62,7 +65,8 @@ def _calculate_answer_relevance(result: dict) -> float:
         "contexts": [result["contexts"]]
     }
     dataset = Dataset.from_dict(data)
-    result = evaluate(dataset=dataset, metrics=[answer_relevancy])
+    llm = OllamaLLM(model="mistral")
+    result = evaluate(dataset=dataset, metrics=[answer_relevancy], llm=llm)
     
     return float(result["answer_relevancy"])
 
@@ -80,7 +84,8 @@ def _calculate_answer_faithfulness(result: dict):
     }
 
     dataset = Dataset.from_dict(data)
-    result = evaluate(dataset, metrics=[faithfulness])
+    llm = OllamaLLM(model="mistral")
+    result = evaluate(dataset, metrics=[faithfulness], llm=llm)
 
     return float(result["faithfulness"])
 

@@ -26,10 +26,9 @@ def combine_docs(docs: list[Document]) -> str:
     return "\n\n".join(doc.page_content for doc in docs)
 
 
-
+TEST_DATASET_PATH = DATA_DIR_PATH / "test_dataset.json"
 def load_test_dataset() -> list[dict]:
-    dataset = Path("test_dataset.json").resolve()
-    with open(dataset, "r") as f:
+    with open(TEST_DATASET_PATH, "r") as f:
         data = json.load(f)
 
     # return a list of dicts, 

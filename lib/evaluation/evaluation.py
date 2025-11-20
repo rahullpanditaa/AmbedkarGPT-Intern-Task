@@ -3,9 +3,9 @@ from lib.rag_chain import create_rag_chain_for_config
 from lib.search.search_utils import load_test_dataset
 from langchain_core.documents import Document
 from pathlib import Path
-from metrics.retrieval_metrics import calculate_retrieval_metrics
-from metrics.answer_quality_metrics import calculate_answer_quality_metrics
-from metrics.semantic_metrics import calculate_semantic_metrics
+from lib.metrics.retrieval_metrics import calculate_retrieval_metrics
+from lib.metrics.answer_quality_metrics import calculate_answer_quality_metrics
+from lib.metrics.semantic_metrics import calculate_semantic_metrics
 
 TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
 AGGREGATED_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "aggregated_results.json"
@@ -35,7 +35,7 @@ def evaluate_config(cfg_name, config):
         source_docs = q["source_documents"]
 
         # retrieve relevant docs based on test question
-        retrieved_docs: list[Document] = retriever._get_relevant_documents(query=question)
+        retrieved_docs: list[Document] = retriever._get_relevant_documents(query=question, run_manager=None)
         # list of names of sources of retrieved docs
         retrieved_source_names = [
             Path(doc.metadata["source"]).resolve().name

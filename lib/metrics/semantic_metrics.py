@@ -1,4 +1,4 @@
-from evaluation.evaluation import evaluate_config
+# from lib.evaluation.evaluation import evaluate_config
 from sklearn.metrics.pairwise import cosine_similarity
 from langchain_huggingface import HuggingFaceEmbeddings
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction

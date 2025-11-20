@@ -1,5 +1,3 @@
-from evaluation.evaluation import evaluate_config
-
 CHUNK_CONFIGS = {
     "small":  {"chunk_size": 250, "chunk_overlap": 150},
     "medium": {"chunk_size": 550, "chunk_overlap": 150},
@@ -32,6 +30,8 @@ def calculate_retrieval_metrics(config_name: str, results: list[dict]):
     return results_with_metrics
 
 def _calculate_hit_rate(expected_sources: list[str], retrieved_sources: list[str]) -> int:
+    if len(retrieved_sources) == 0:
+        return 0
     # return 1 if even one match, else 0
     for src in retrieved_sources:
         if src in expected_sources:
@@ -39,6 +39,8 @@ def _calculate_hit_rate(expected_sources: list[str], retrieved_sources: list[str
     return 0
 
 def _calculate_precision_score(expected_sources: list[str], retrieved_sources: list[str]) -> float:
+    if len(retrieved_sources) == 0:
+        return 0.0
     # relevant retrieved / total retrieved
     relevant_retrieved = 0
     for src in retrieved_sources:
@@ -46,10 +48,12 @@ def _calculate_precision_score(expected_sources: list[str], retrieved_sources: l
             relevant_retrieved += 1
     return relevant_retrieved / len(retrieved_sources)
 
-def _calculate_mrr(expected_sources: list[str], retrieved_sources: list[str]):
+def _calculate_mrr(expected_sources: list[str], retrieved_sources: list[str]) -> float:
+    if len(retrieved_sources) == 0:
+        return 0.0
     for i, retrieved in enumerate(retrieved_sources, 1):
         if retrieved in expected_sources:
             return 1 / i
             
-    return 0
+    return 0.0
 

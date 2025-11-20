@@ -65,7 +65,7 @@ def _calculate_answer_relevance(result: dict) -> float:
         "contexts": [result["contexts"]]
     }
     dataset = Dataset.from_dict(data)
-    llm = OllamaLLM(model="mistral")
+    llm = OllamaLLM(model="deepseek-r1:1.5b")
     result = evaluate(dataset=dataset, metrics=[answer_relevancy], llm=llm)
     
     return float(result["answer_relevancy"])
@@ -84,7 +84,7 @@ def _calculate_answer_faithfulness(result: dict):
     }
 
     dataset = Dataset.from_dict(data)
-    llm = OllamaLLM(model="mistral")
+    llm = OllamaLLM(model="deepseek-r1:1.5b")
     result = evaluate(dataset, metrics=[faithfulness], llm=llm)
 
     return float(result["faithfulness"])

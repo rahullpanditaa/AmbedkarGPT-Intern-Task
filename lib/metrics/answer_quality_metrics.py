@@ -73,11 +73,13 @@ def _calculate_answer_relevance(result: dict) -> float:
     scores = evaluate(dataset=dataset, 
                       metrics=[answer_relevancy], 
                       llm=llm, 
-                      embeddings=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"))
+                      embeddings=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"),
+                      show_progress=True)
 
     time.sleep(20.0)
     
-    return float(scores["answer_relevancy"])
+    # return float(scores["answer_relevancy"])
+    return float(scores.scores["answer_relevancy"])
 
 # faithfulness - check for hallucinations. Factual consistence
 # of response relative to the retrieved context
@@ -98,9 +100,12 @@ def _calculate_answer_faithfulness(result: dict):
     scores = evaluate(dataset, 
                       metrics=[faithfulness], 
                       llm=llm,
-                      embeddings=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"))
+                      embeddings=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"),
+                      show_progress=True)
 
     time.sleep(20.0)
 
-    return float(scores["faithfulness"])
+    # return float(scores["faithfulness"])
+    return float(scores.scores["faithfulness"])
+
 

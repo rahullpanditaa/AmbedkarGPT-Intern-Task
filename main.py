@@ -1,4 +1,4 @@
-from lib.evaluation.evaluation import complete_evaluation, aggregate_results
+from lib.evaluation.eval import complete_evaluation, aggregate_results
 
 def main():
     complete_evaluation(cfg_name="small")

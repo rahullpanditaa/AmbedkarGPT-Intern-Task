@@ -46,7 +46,7 @@ def evaluate_config(cfg_name, config):
         # generate an answer to test question
         answer = rag_chain.invoke(question)
 
-        time.sleep(10)
+        time.sleep(8)
 
         results.append({
             "id": q["id"],

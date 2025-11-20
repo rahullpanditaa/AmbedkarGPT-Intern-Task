@@ -79,7 +79,7 @@ def _calculate_answer_relevance(result: dict) -> float:
     time.sleep(20.0)
     
     # return float(scores["answer_relevancy"])
-    return float(scores.scores["answer_relevancy"])
+    return float(scores.scores[0]["answer_relevancy"])
 
 # faithfulness - check for hallucinations. Factual consistence
 # of response relative to the retrieved context
@@ -106,6 +106,6 @@ def _calculate_answer_faithfulness(result: dict):
     time.sleep(20.0)
 
     # return float(scores["faithfulness"])
-    return float(scores.scores["faithfulness"])
+    return float(scores.scores[0]["faithfulness"])
 
 

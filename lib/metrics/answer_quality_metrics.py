@@ -3,15 +3,39 @@ from rouge_score import rouge_scorer
 from ragas.metrics import answer_relevancy, faithfulness
 from ragas import evaluate
 from datasets import Dataset
-\
 
-def calculate_answer_quality_metrics():
-    ...
+CHUNK_CONFIGS = {
+    "small":  {"chunk_size": 250, "chunk_overlap": 150},
+    "medium": {"chunk_size": 550, "chunk_overlap": 150},
+    "large":  {"chunk_size": 900, "chunk_overlap": 150},
+}
+
+def calculate_answer_quality_metrics(config_name: str):
+    results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
+
+    results_with_answer_quality_metrics = []
+
+    for result in results:
+        ground_truth = result["ground_truth"]
+        generated_answer = result["generated_answer"]
+        rougeL = _calculate_rouge_score(ground_truth=ground_truth,
+                                        generated_answer=generated_answer) if result["answerable"] else None
+        ans_relevance = _calculate_answer_relevance(result=result) if result["answerable"] else None
+        ans_faithfulness = _calculate_answer_faithfulness(result=result) if result["answerable"] else None
+
+        new_result = result.copy()
+        new_result["rougeL"] = rougeL
+        new_result["answer_relevance"] = ans_relevance
+        new_result["faithfulness"] = ans_faithfulness
+        results_with_answer_quality_metrics.append(new_result)
+    
+    return results_with_answer_quality_metrics
+
 
 
 # similarity - how much of the ground truth appears in the 
 # generated answer
-def calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
+def _calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
     if generated_answer == "" or ground_truth == "":
         return 0
     # rouge-l - longest common subsequence b/w the 2 texts
@@ -29,7 +53,9 @@ def calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
 # answer relevance - check whether the generated answer is
 # actually about the question i.e semantic alignment b/w
 # question and answer
-def calculate_answer_relevance(result: dict) -> float:
+def _calculate_answer_relevance(result: dict) -> float:
+    if result["generated_answer"] == "":
+        return 0.0
     data = {
         "question": [result["question"]],
         "answer": [result["generated_answer"]],
@@ -44,7 +70,9 @@ def calculate_answer_relevance(result: dict) -> float:
 # of response relative to the retrieved context
 # response considered faithful if all claims in it can be 
 # supported by retrieved docs
-def calculate_answer_faithfulness(result: dict):
+def _calculate_answer_faithfulness(result: dict):
+    if result["generated_answer"] == "":
+        return 0.0
     data = {
         "question": [result["question"]],
         "answer": [result["generated_answer"]],

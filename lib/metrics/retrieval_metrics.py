@@ -1,7 +1,14 @@
 from evaluation.evaluation import evaluate_config
 
-def calculate_retrieval_metrics(k: int=5):
-    results: list[dict] = evaluate_config()
+CHUNK_CONFIGS = {
+    "small":  {"chunk_size": 250, "chunk_overlap": 150},
+    "medium": {"chunk_size": 550, "chunk_overlap": 150},
+    "large":  {"chunk_size": 900, "chunk_overlap": 150},
+}
+
+
+def calculate_retrieval_metrics(config_name: str):
+    results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
 
     results_with_metrics = []
     
@@ -17,7 +24,7 @@ def calculate_retrieval_metrics(k: int=5):
                             retrieved_sources=retrieved_sources) if result["answerable"] else None
         new_result = result.copy()
         new_result["hit_rate"] = hit_rate
-        new_result[f"precision_at_{k}"] = precision_score
+        new_result[f"precision_at_5"] = precision_score
         new_result["mrr"] = mrr
 
         results_with_metrics.append(new_result)

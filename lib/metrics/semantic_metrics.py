@@ -8,6 +8,7 @@ CHUNK_CONFIGS = {
     "medium": {"chunk_size": 550, "chunk_overlap": 150},
     "large":  {"chunk_size": 900, "chunk_overlap": 150},
 }
+HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 def calculate_semantic_metrics(results: list[dict]):
     # results: list[dict] = evaluate_config(cfg_name=config_name.lower(),
@@ -37,10 +38,10 @@ def _calculate_cosine_similarity(ground_truth: str, generated_answer: str):
         return 0.0
 
     # need to embed both
-    hf = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    # hf = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    truth_embedding = hf.embed_query(ground_truth)
-    answer_embedding = hf.embed_query(generated_answer)
+    truth_embedding = HF_EMBEDDING.embed_query(ground_truth)
+    answer_embedding = HF_EMBEDDING.embed_query(generated_answer)
 
     cos_sim = cosine_similarity(X=[truth_embedding], Y=[answer_embedding])
     return float(cos_sim[0][0])

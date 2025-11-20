@@ -14,6 +14,9 @@ CHUNK_CONFIGS = {
     "large":  {"chunk_size": 900, "chunk_overlap": 150},
 }
 
+HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+LLM = OllamaLLM(model="mistral")
+
 def calculate_answer_quality_metrics(results: list[dict]):
     # results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
 
@@ -69,11 +72,11 @@ def _calculate_answer_relevance(result: dict) -> float:
     }
     dataset = Dataset.from_dict(data)
     # llm = OllamaLLM(model="deepseek-r1:1.5b")
-    llm = OllamaLLM(model="mistral")
+    # llm = OllamaLLM(model="mistral")
     scores = evaluate(dataset=dataset, 
                       metrics=[answer_relevancy], 
-                      llm=llm, 
-                      embeddings=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"),
+                      llm=LLM, 
+                      embeddings=HF_EMBEDDING,
                       show_progress=True)
 
     time.sleep(15.0)
@@ -96,11 +99,11 @@ def _calculate_answer_faithfulness(result: dict):
 
     dataset = Dataset.from_dict(data)
     # llm = OllamaLLM(model="deepseek-r1:1.5b")
-    llm = OllamaLLM(model="mistral")
+    # llm = OllamaLLM(model="mistral")
     scores = evaluate(dataset, 
                       metrics=[faithfulness], 
-                      llm=llm,
-                      embeddings=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"),
+                      llm=LLM,
+                      embeddings=HF_EMBEDDING,
                       show_progress=True)
 
     time.sleep(15.0)

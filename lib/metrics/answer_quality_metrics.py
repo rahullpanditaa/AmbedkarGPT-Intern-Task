@@ -36,7 +36,7 @@ def calculate_answer_quality_metrics(config_name: str):
 # similarity - how much of the ground truth appears in the 
 # generated answer
 def _calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
-    if generated_answer == "" or ground_truth == "":
+    if generated_answer.strip() == "" or ground_truth.strip() == "":
         return 0
     # rouge-l - longest common subsequence b/w the 2 texts
     scorer = rouge_scorer.RougeScorer(["rougeL"])
@@ -54,7 +54,7 @@ def _calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
 # actually about the question i.e semantic alignment b/w
 # question and answer
 def _calculate_answer_relevance(result: dict) -> float:
-    if result["generated_answer"] == "":
+    if result["generated_answer"].strip() == "":
         return 0.0
     data = {
         "question": [result["question"]],
@@ -71,7 +71,7 @@ def _calculate_answer_relevance(result: dict) -> float:
 # response considered faithful if all claims in it can be 
 # supported by retrieved docs
 def _calculate_answer_faithfulness(result: dict):
-    if result["generated_answer"] == "":
+    if result["generated_answer"].strip() == "":
         return 0.0
     data = {
         "question": [result["question"]],

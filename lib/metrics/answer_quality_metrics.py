@@ -1,5 +1,9 @@
 from evaluation.evaluation import evaluate_config
 from rouge_score import rouge_scorer
+from ragas.metrics import answer_relevancy
+from ragas import evaluate
+from datasets import Dataset
+
 def calculate_answer_quality_metrics():
     ...
 
@@ -20,3 +24,17 @@ def calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
 
     # use fmeasure (balances both recall, precision)
     return rouge_l_score.fmeasure
+
+# answer relevance - check whether the generated answer is
+# actually about the question i.e semantic alignment b/w
+# question and answer
+def calculate_answer_relevance(result: dict):
+    data = {
+        "question": [result["question"]],
+        "answer": [result["generated_answer"]],
+        "contexts": [result["contexts"]]
+    }
+    dataset = Dataset.from_dict(data)
+    score = evaluate(dataset=dataset, metrics=[answer_relevancy])
+    
+    return score["answer_relevancy"]

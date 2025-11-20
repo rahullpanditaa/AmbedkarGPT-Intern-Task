@@ -10,10 +10,26 @@ CHUNK_CONFIGS = {
 }
 
 def calculate_semantic_metrics(config_name: str):
-    results = evaluate_config(cfg_name=config_name.lower(),
+    results: list[dict] = evaluate_config(cfg_name=config_name.lower(),
                               config=CHUNK_CONFIGS[config_name.lower()])
     
     results_with_semantic_metrics = []
+
+    for result in results:
+        ground_truth = result["ground_truth"]
+        generated_answer = result["generated_answer"]
+
+        cos_sim = _calculate_cosine_similarity(ground_truth=ground_truth,
+                                               generated_answer=generated_answer) if result["answerable"] else None
+        bleu_score = _calculate_bleu_score(ground_truth=ground_truth,
+                                           generated_answer=generated_answer) if result["answerable"] else None
+        
+        new_result = result.copy()
+        new_result["cosine_similarity"] = cos_sim
+        new_result["bleu_score"] = bleu_score
+        results_with_semantic_metrics.append(new_result)
+
+    return results_with_semantic_metrics
 
 
 def _calculate_cosine_similarity(ground_truth: str, generated_answer: str):

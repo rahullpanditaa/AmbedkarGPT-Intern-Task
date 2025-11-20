@@ -28,7 +28,7 @@ def evaluate_config(cfg_name, config):
     test_dataset_questions = load_test_dataset()
     results = []
 
-    for q in test_dataset_questions:
+    for i, q in enumerate(test_dataset_questions, 1):
         question = q["question"]
         ground_truth = q["ground_truth"]
 
@@ -46,7 +46,7 @@ def evaluate_config(cfg_name, config):
         # generate an answer to test question
         answer = rag_chain.invoke(question)
 
-        time.sleep(20.0)
+        time.sleep(16.5)
 
         results.append({
             "id": q["id"],
@@ -60,8 +60,7 @@ def evaluate_config(cfg_name, config):
             "question_type": q["question_type"],
             "answerable": q["answerable"]
         })
-        print(f"\n- Test question: {question}")
-        print(f"- Generated answer: {answer}")
+        print(f"- Q{i} ✔️")
 
     return results
 
@@ -70,9 +69,9 @@ def complete_evaluation(cfg_name: str):
 
     print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")
     results = evaluate_config(cfg_name=cfg_name, config=CHUNK_CONFIGS[cfg_name])
-    r = calculate_retrieval_metrics(config_name=cfg_name, results=results)
-    r = calculate_answer_quality_metrics(config_name=cfg_name ,results=r)
-    r = calculate_semantic_metrics(config_name=cfg_name, results=r)
+    r = calculate_retrieval_metrics(results=results)
+    r = calculate_answer_quality_metrics(results=r)
+    r = calculate_semantic_metrics(results=r)
     cfg_results[cfg_name] = r
 
 

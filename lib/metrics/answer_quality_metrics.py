@@ -4,6 +4,7 @@ from ragas.metrics import answer_relevancy, faithfulness
 from ragas import evaluate
 from datasets import Dataset
 from langchain_ollama import OllamaLLM
+from langchain_huggingface import HuggingFaceEmbeddings
 
 
 
@@ -69,11 +70,14 @@ def _calculate_answer_relevance(result: dict) -> float:
     dataset = Dataset.from_dict(data)
     # llm = OllamaLLM(model="deepseek-r1:1.5b")
     llm = OllamaLLM(model="mistral")
-    result = evaluate(dataset=dataset, metrics=[answer_relevancy], llm=llm)
+    scores = evaluate(dataset=dataset, 
+                      metrics=[answer_relevancy], 
+                      llm=llm, 
+                      embeddings=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"))
 
     time.sleep(20.0)
     
-    return float(result["answer_relevancy"])
+    return float(scores["answer_relevancy"])
 
 # faithfulness - check for hallucinations. Factual consistence
 # of response relative to the retrieved context
@@ -91,9 +95,12 @@ def _calculate_answer_faithfulness(result: dict):
     dataset = Dataset.from_dict(data)
     # llm = OllamaLLM(model="deepseek-r1:1.5b")
     llm = OllamaLLM(model="mistral")
-    result = evaluate(dataset, metrics=[faithfulness], llm=llm)
+    scores = evaluate(dataset, 
+                      metrics=[faithfulness], 
+                      llm=llm,
+                      embeddings=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"))
 
     time.sleep(20.0)
 
-    return float(result["faithfulness"])
+    return float(scores["faithfulness"])
 

@@ -60,21 +60,6 @@ def evaluate_config(cfg_name, config):
 
     return results
 
-# def evaluate_results():
-#     final_results = {}
-
-#     for name, cfg in CHUNK_CONFIGS.items():
-#         print(f"\n- Evaluating chunking strategy - '{name.upper()}', (Chunk overlap: {cfg['chunk_overlap']}).")
-#         results = evaluate_config(name, cfg)
-#         # dict where key = chunking strategy name, value = results
-#         final_results[name] = results
-
-#     # save results
-#     with open(TEST_RESULTS_PATH, "w") as f:
-#         json.dump(final_results, f, indent=2)
-
-#     print("\n- Saved evaluation results to 'test_results.json'")
-
 def complete_evaluation():
     final_results = {}
 
@@ -98,37 +83,31 @@ def aggregate_results():
     with open(TEST_RESULTS_PATH, "r") as f:
         results = json.load(f)
 
-    # results - dict where keys=small, medium, large, values = list[dict]
     for chunking_strategy, result in results.items():
-        avg_hit_rate=avg_precision=avg_mrr=avg_rougel=avg_ans_rel=avg_faithfulness=avg_cos_sim=avg_bleu = 0.0
-
-        # count = 25
-        for result_per_question in result:
-            # if None in result_per_question.values():
-            #     count -= 1
-            #     continue
-            avg_hit_rate += result_per_question["hit_rate"] if result_per_question["hit_rate"] else 0
-            avg_precision += result_per_question["precision_at_5"] if result_per_question["precision_at_5"] else 0
-            avg_mrr += result_per_question["mrr"] if result_per_question["mrr"] else 0
-            avg_rougel += result_per_question["rougeL"] if result_per_question["rougeL"] else 0
-            avg_ans_rel += result_per_question["answer_relevance"] if result_per_question["answer_relevance"] else 0
-            avg_faithfulness += result_per_question["faithfulness"] if result_per_question["faithfulness"] else 0
-            avg_cos_sim += result_per_question["cosine_similarity"] if result_per_question["cosine_similarity"] else 0
-            avg_bleu += result_per_question["bleu_score"] if result_per_question["bleu_score"] else 0
         agg_results[chunking_strategy] = {
-            "avg_hit_rate": avg_hit_rate/25,
-            "avg_precision": avg_precision/25,
-            "avg_mrr": avg_mrr/25,
-            "avg_rougeL": avg_rougel/25,
-            "avg_relevance": avg_ans_rel/25,
-            "avg_faithfulness": avg_faithfulness/25,
-            "avg_cosine_similarity": avg_cos_sim/25,
-            "avg_bleu_score": avg_bleu / 25
-        }
+            "avg_hit_rate": _calculate_avg_for_each_metric(results=result, metric="hit_rate"),
+            "avg_precision": _calculate_avg_for_each_metric(results=result, metric="precision_at_5"),
+            "avg_mrr": _calculate_avg_for_each_metric(results=result, metric="mrr"),
+            "avg_rougeL": _calculate_avg_for_each_metric(results=result, metric="rougeL"),
+            "avg_relevance": _calculate_avg_for_each_metric(results=result, metric="answer_relevance"),
+            "avg_faithfulness": _calculate_avg_for_each_metric(results=result, metric="faithfulness"),
+            "avg_cosine_similarity": _calculate_avg_for_each_metric(results=result, metric="cosine_similarity"),
+            "avg_bleu": _calculate_avg_for_each_metric(results=result, metric="bleu_score"),
+        }            
 
     with open(AGGREGATED_RESULTS_PATH, "w") as f:
         json.dump(agg_results, f, indent=2)
 
     print("\n- Saved aggregated metrics to 'data/aggregated_results.json'")
-        
 
+def _calculate_avg_for_each_metric(results: list[dict], metric: str) -> float:
+    metric_sum = 0.0
+    metric_count = 0.0
+    for result_per_question in results:
+        value = result_per_question[metric]
+        if value is not None:
+            metric_sum += value
+            metric_count += 1
+
+    return metric_sum / metric_count if metric_count > 0 else 0.0
+    

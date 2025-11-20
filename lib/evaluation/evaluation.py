@@ -60,45 +60,95 @@ def evaluate_config(cfg_name, config):
 
     return results
 
-def complete_evaluation():
-    final_results = {}
+def complete_evaluation(cfg_name: str):
+    cfg_results = {}
 
-    for name, cfg in CHUNK_CONFIGS.items():
-        print(f"\n- Evaluating chunking strategy - '{name.upper()}', (Chunk overlap: {cfg['chunk_overlap']}).")
-        results = evaluate_config(name, cfg)
-        # now, calculate all evaluation metrics
-        r = calculate_retrieval_metrics(config_name=name, results=results)
-        r = calculate_answer_quality_metrics(config_name=name, results=r)
-        r = calculate_semantic_metrics(config_name=name, results=r)
-        final_results[name] = r
+    print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")
+    results = evaluate_config(cfg_name=cfg_name, config=CHUNK_CONFIGS[cfg_name])
+    r = calculate_retrieval_metrics(config_name=cfg_name, results=results)
+    r = calculate_answer_quality_metrics(config_name=cfg_name ,results=r)
+    r = calculate_semantic_metrics(config_name=cfg_name, results=r)
+    cfg_results[cfg_name] = r
+
+
+    # {cfg_name: list[dict]}
+
+    # for name, cfg in CHUNK_CONFIGS.items():
+    #     print(f"\n- Evaluating chunking strategy - '{name.upper()}', (Chunk overlap: {cfg['chunk_overlap']}).")
+    #     results = evaluate_config(name, cfg)
+    #     # now, calculate all evaluation metrics
+    #     r = calculate_retrieval_metrics(config_name=name, results=results)
+    #     r = calculate_answer_quality_metrics(config_name=name, results=r)
+    #     r = calculate_semantic_metrics(config_name=name, results=r)
+    #     final_results[name] = r
+
+    # if yes, result for at least one config already written
+    if TEST_RESULTS_PATH.exists():
+        with open(TEST_RESULTS_PATH, "r") as f:
+            test_results = json.load(f)
+    else:
+        test_results = {}
+
+    # merge dicts
+    final_results = test_results | cfg_results
 
     with open(TEST_RESULTS_PATH, "w") as f:
         json.dump(final_results, f, indent=2)
 
-    print("\n- Saved evaluation results to 'data/test_results.json'")
+    print(f"\n- Saved evaluation results for '{cfg_name.upper()}' to 'data/test_results.json'")
 
-def aggregate_results():
-    agg_results = {}
+def aggregate_results(cfg_name: str):
+    # load aggregated results if they exist
+    if AGGREGATED_RESULTS_PATH.exists():
+        with open(AGGREGATED_RESULTS_PATH, "r") as f:
+            agg_results = json.load(f)
+    else:
+        agg_results = {}
+
+    if not TEST_RESULTS_PATH.exists():
+        print("File 'test_results.json' does not exist. Run evaluation first.")
+        return
 
     with open(TEST_RESULTS_PATH, "r") as f:
         results = json.load(f)
 
-    for chunking_strategy, result in results.items():
-        agg_results[chunking_strategy] = {
-            "avg_hit_rate": _calculate_avg_for_each_metric(results=result, metric="hit_rate"),
-            "avg_precision": _calculate_avg_for_each_metric(results=result, metric="precision_at_5"),
-            "avg_mrr": _calculate_avg_for_each_metric(results=result, metric="mrr"),
-            "avg_rougeL": _calculate_avg_for_each_metric(results=result, metric="rougeL"),
-            "avg_relevance": _calculate_avg_for_each_metric(results=result, metric="answer_relevance"),
-            "avg_faithfulness": _calculate_avg_for_each_metric(results=result, metric="faithfulness"),
-            "avg_cosine_similarity": _calculate_avg_for_each_metric(results=result, metric="cosine_similarity"),
-            "avg_bleu": _calculate_avg_for_each_metric(results=result, metric="bleu_score"),
-        }            
+    # results - {small: list[dict], medium: list[dict], large: list[dict]}
+    cfg_results = results.get(cfg_name)
+
+    if cfg_results is None:
+        print(f"No results found for config '{cfg_name}'.")
+        return
+
+    # cfg_results = list[dict]
+    # for result in cfg_results:
+    agg_results[cfg_name] = {
+            "avg_hit_rate": _calculate_avg_for_each_metric(results=cfg_results, metric="hit_rate"),
+            "avg_precision": _calculate_avg_for_each_metric(results=cfg_results, metric="precision_at_5"),
+            "avg_mrr": _calculate_avg_for_each_metric(results=cfg_results, metric="mrr"),
+            "avg_rougeL": _calculate_avg_for_each_metric(results=cfg_results, metric="rougeL"),
+            "avg_relevance": _calculate_avg_for_each_metric(results=cfg_results, metric="answer_relevance"),
+            "avg_faithfulness": _calculate_avg_for_each_metric(results=cfg_results, metric="faithfulness"),
+            "avg_cosine_similarity": _calculate_avg_for_each_metric(results=cfg_results, metric="cosine_similarity"),
+            "avg_bleu": _calculate_avg_for_each_metric(results=cfg_results, metric="bleu_score"),
+        }
+
+    # for chunking_strategy, result in results.items():
+    #     agg_results[chunking_strategy] = {
+    #         "avg_hit_rate": _calculate_avg_for_each_metric(results=result, metric="hit_rate"),
+    #         "avg_precision": _calculate_avg_for_each_metric(results=result, metric="precision_at_5"),
+    #         "avg_mrr": _calculate_avg_for_each_metric(results=result, metric="mrr"),
+    #         "avg_rougeL": _calculate_avg_for_each_metric(results=result, metric="rougeL"),
+    #         "avg_relevance": _calculate_avg_for_each_metric(results=result, metric="answer_relevance"),
+    #         "avg_faithfulness": _calculate_avg_for_each_metric(results=result, metric="faithfulness"),
+    #         "avg_cosine_similarity": _calculate_avg_for_each_metric(results=result, metric="cosine_similarity"),
+    #         "avg_bleu": _calculate_avg_for_each_metric(results=result, metric="bleu_score"),
+    #     }
+                
 
     with open(AGGREGATED_RESULTS_PATH, "w") as f:
         json.dump(agg_results, f, indent=2)
 
-    print("\n- Saved aggregated metrics to 'data/aggregated_results.json'")
+    print(f"\n- Saved aggregated metrics for '{cfg_name.upper()}' to 'data/aggregated_results.json'")
 
 def _calculate_avg_for_each_metric(results: list[dict], metric: str) -> float:
     metric_sum = 0.0

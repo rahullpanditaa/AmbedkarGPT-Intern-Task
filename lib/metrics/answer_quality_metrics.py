@@ -1,4 +1,4 @@
-# from lib.evaluation.evaluation import evaluate_config
+import time
 from rouge_score import rouge_scorer
 from ragas.metrics import answer_relevancy, faithfulness
 from ragas import evaluate
@@ -13,7 +13,7 @@ CHUNK_CONFIGS = {
     "large":  {"chunk_size": 900, "chunk_overlap": 150},
 }
 
-def calculate_answer_quality_metrics(config_name: str, results: list[dict]):
+def calculate_answer_quality_metrics(results: list[dict]):
     # results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
 
     results_with_answer_quality_metrics = []
@@ -23,7 +23,9 @@ def calculate_answer_quality_metrics(config_name: str, results: list[dict]):
         generated_answer = result["generated_answer"]
         rougeL = _calculate_rouge_score(ground_truth=ground_truth,
                                         generated_answer=generated_answer) if result["answerable"] else None
+        
         ans_relevance = _calculate_answer_relevance(result=result) if result["answerable"] else None
+        
         ans_faithfulness = _calculate_answer_faithfulness(result=result) if result["answerable"] else None
 
         new_result = result.copy()
@@ -65,8 +67,11 @@ def _calculate_answer_relevance(result: dict) -> float:
         "contexts": [result["contexts"]]
     }
     dataset = Dataset.from_dict(data)
-    llm = OllamaLLM(model="deepseek-r1:1.5b")
+    # llm = OllamaLLM(model="deepseek-r1:1.5b")
+    llm = OllamaLLM(model="mistral")
     result = evaluate(dataset=dataset, metrics=[answer_relevancy], llm=llm)
+
+    time.sleep(20.0)
     
     return float(result["answer_relevancy"])
 
@@ -84,8 +89,11 @@ def _calculate_answer_faithfulness(result: dict):
     }
 
     dataset = Dataset.from_dict(data)
-    llm = OllamaLLM(model="deepseek-r1:1.5b")
+    # llm = OllamaLLM(model="deepseek-r1:1.5b")
+    llm = OllamaLLM(model="mistral")
     result = evaluate(dataset, metrics=[faithfulness], llm=llm)
+
+    time.sleep(20.0)
 
     return float(result["faithfulness"])
 

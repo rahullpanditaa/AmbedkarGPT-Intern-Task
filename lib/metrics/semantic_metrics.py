@@ -9,7 +9,7 @@ CHUNK_CONFIGS = {
     "large":  {"chunk_size": 900, "chunk_overlap": 150},
 }
 
-def calculate_semantic_metrics(config_name: str, results: list[dict]):
+def calculate_semantic_metrics(results: list[dict]):
     # results: list[dict] = evaluate_config(cfg_name=config_name.lower(),
                             #   config=CHUNK_CONFIGS[config_name.lower()])
     

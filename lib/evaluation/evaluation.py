@@ -60,6 +60,8 @@ def evaluate_config(cfg_name, config):
             "question_type": q["question_type"],
             "answerable": q["answerable"]
         })
+        print(f"\n- Test question: {question}")
+        print(f"- Generated answer: {answer}")
 
     return results
 

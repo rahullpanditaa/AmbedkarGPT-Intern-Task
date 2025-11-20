@@ -46,15 +46,15 @@ def evaluate_config(cfg_name, config):
         # generate an answer to test question
         answer = rag_chain.invoke(question)
 
-        time.sleep(8)
+        time.sleep(8.0)
 
         results.append({
             "id": q["id"],
             "question": question,
             "ground_truth": ground_truth,
             "generated_answer": answer,
-            "expected_docs_txt_files": ", ".join(source_docs),
-            "retrieved_docs_txt_files": ", ".join(retrieved_source_names),
+            "expected_docs_txt_files": source_docs,
+            "retrieved_docs_txt_files": retrieved_source_names,
             "contexts": [doc.page_content for doc in retrieved_docs],
             "chunk_config": cfg_name,
             "question_type": q["question_type"],
@@ -73,18 +73,6 @@ def complete_evaluation(cfg_name: str):
     r = calculate_answer_quality_metrics(results=r)
     r = calculate_semantic_metrics(results=r)
     cfg_results[cfg_name] = r
-
-
-    # {cfg_name: list[dict]}
-
-    # for name, cfg in CHUNK_CONFIGS.items():
-    #     print(f"\n- Evaluating chunking strategy - '{name.upper()}', (Chunk overlap: {cfg['chunk_overlap']}).")
-    #     results = evaluate_config(name, cfg)
-    #     # now, calculate all evaluation metrics
-    #     r = calculate_retrieval_metrics(config_name=name, results=results)
-    #     r = calculate_answer_quality_metrics(config_name=name, results=r)
-    #     r = calculate_semantic_metrics(config_name=name, results=r)
-    #     final_results[name] = r
 
     # if yes, result for at least one config already written
     if TEST_RESULTS_PATH.exists():
@@ -134,20 +122,7 @@ def aggregate_results(cfg_name: str):
             "avg_faithfulness": _calculate_avg_for_each_metric(results=cfg_results, metric="faithfulness"),
             "avg_cosine_similarity": _calculate_avg_for_each_metric(results=cfg_results, metric="cosine_similarity"),
             "avg_bleu": _calculate_avg_for_each_metric(results=cfg_results, metric="bleu_score"),
-        }
-
-    # for chunking_strategy, result in results.items():
-    #     agg_results[chunking_strategy] = {
-    #         "avg_hit_rate": _calculate_avg_for_each_metric(results=result, metric="hit_rate"),
-    #         "avg_precision": _calculate_avg_for_each_metric(results=result, metric="precision_at_5"),
-    #         "avg_mrr": _calculate_avg_for_each_metric(results=result, metric="mrr"),
-    #         "avg_rougeL": _calculate_avg_for_each_metric(results=result, metric="rougeL"),
-    #         "avg_relevance": _calculate_avg_for_each_metric(results=result, metric="answer_relevance"),
-    #         "avg_faithfulness": _calculate_avg_for_each_metric(results=result, metric="faithfulness"),
-    #         "avg_cosine_similarity": _calculate_avg_for_each_metric(results=result, metric="cosine_similarity"),
-    #         "avg_bleu": _calculate_avg_for_each_metric(results=result, metric="bleu_score"),
-    #     }
-                
+        }  
 
     with open(AGGREGATED_RESULTS_PATH, "w") as f:
         json.dump(agg_results, f, indent=2)

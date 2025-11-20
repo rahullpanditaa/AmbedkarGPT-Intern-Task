@@ -1,9 +1,7 @@
 from evaluation.evaluation import evaluate_config
 from sklearn.metrics.pairwise import cosine_similarity
 from langchain_huggingface import HuggingFaceEmbeddings
-from ragas.metrics import BleuScore
-from ragas import evaluate
-from datasets import Dataset
+from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 
 CHUNK_CONFIGS = {
     "small":  {"chunk_size": 250, "chunk_overlap": 150},
@@ -36,6 +34,15 @@ def _calculate_bleu_score(ground_truth: str, generated_answer: str):
     if ground_truth.strip() == "" or generated_answer.strip() == "":
         return 0.0
     
+    # create ground_truth, answer tokens
+    gt = ground_truth.split()
+    ans = generated_answer.split()
+
+    sm = SmoothingFunction().method1()
+
+    bleu = sentence_bleu(references=[gt], hypothesis=ans, smoothing_function=sm)
+
+    return float(bleu)
     # data = {
     #     "reference": ground_truth,
     #     "response": generated_answer

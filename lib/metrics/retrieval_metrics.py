@@ -29,6 +29,8 @@ def calculate_retrieval_metrics(config_name: str, results: list[dict]):
 
         results_with_metrics.append(new_result)
 
+    return results_with_metrics
+
 def _calculate_hit_rate(expected_sources: list[str], retrieved_sources: list[str]) -> int:
     # return 1 if even one match, else 0
     for src in retrieved_sources:

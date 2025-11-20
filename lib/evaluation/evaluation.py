@@ -1,4 +1,5 @@
 import json
+import time
 from lib.rag_chain import create_rag_chain_for_config
 from lib.search.search_utils import load_test_dataset
 from langchain_core.documents import Document
@@ -44,6 +45,8 @@ def evaluate_config(cfg_name, config):
 
         # generate an answer to test question
         answer = rag_chain.invoke(question)
+
+        time.sleep(20.0)
 
         results.append({
             "id": q["id"],

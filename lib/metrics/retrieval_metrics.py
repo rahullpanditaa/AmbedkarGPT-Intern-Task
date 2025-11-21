@@ -1,12 +1,5 @@
-from pathlib import Path
 import json
-
-CHUNK_CONFIGS = {
-    "small":  {"chunk_size": 250, "chunk_overlap": 150},
-    "medium": {"chunk_size": 550, "chunk_overlap": 150},
-    "large":  {"chunk_size": 900, "chunk_overlap": 150},
-}
-TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
+from lib.utils.constants import TEST_RESULTS_PATH
 
 def calculate_retrieval_metrics(cfg_name: str):
     """
@@ -53,8 +46,6 @@ def calculate_retrieval_metrics(cfg_name: str):
 
         updated_cfg_results.append(new_result)
 
-    # updated_results = {}
-    # updated_results[cfg_name] = updated_cfg_results
     all_results[cfg_name] = updated_cfg_results
 
     # save updated results

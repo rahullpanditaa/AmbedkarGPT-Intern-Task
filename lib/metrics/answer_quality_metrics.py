@@ -1,22 +1,12 @@
 import json
-from pathlib import Path
 from rouge_score import rouge_scorer
-from langchain_ollama import OllamaLLM
-from langchain_huggingface import HuggingFaceEmbeddings
 from .semantic_metrics import _calculate_cosine_similarity
 from sklearn.metrics.pairwise import cosine_similarity
-
-
-TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
-
-CHUNK_CONFIGS = {
-    "small":  {"chunk_size": 250, "chunk_overlap": 150},
-    "medium": {"chunk_size": 550, "chunk_overlap": 150},
-    "large":  {"chunk_size": 900, "chunk_overlap": 150},
-}
-
-HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-LLM_METRICS = OllamaLLM(model="phi3:mini", keep_alive="60m")
+from lib.utils.constants import (
+    TEST_RESULTS_PATH,
+    HF_EMBEDDING,
+    LLM_METRICS
+)
 
 def calculate_answer_quality_metrics(cfg_name: str):
     """
@@ -109,10 +99,7 @@ def _calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
 # answer relevance - check whether the generated answer is
 # actually about the question i.e semantic alignment b/w
 # question and answer
-# faithfulness - check for hallucinations. Factual consistence
-# of response relative to the retrieved context
-# response considered faithful if all claims in it can be 
-# supported by retrieved docs
+# USED INSTEAD OF RAGAS.EVALUATE()
 def _calculate_answer_relevance(result: dict) -> float:
     """
     Computes semantic relevance using cosine similarity
@@ -154,7 +141,8 @@ Score from 1 to 5:
 Respond with only a single integer.
 """
 
-def _calculate_faithfulness_custom(result: dict) -> float:
+# LLM generated faithfulness score
+def _calculate_faithfulness_custom_with_llm(result: dict) -> float:
     if not result["answerable"]:
         return None
     
@@ -172,15 +160,17 @@ def _calculate_faithfulness_custom(result: dict) -> float:
     # raw = LLM_METRICS.invoke(prompt)
     raw = "".join(LLM_METRICS.stream(prompt))
 
-    
-    # Extract first digit (1–5)
     for ch in raw:
         if ch in "12345":
             return float(ch)
 
     return 0.0
 
-
+# faithfulness - check for hallucinations. Factual consistence
+# of response relative to the retrieved context
+# response considered faithful if all claims in it can be 
+# supported by retrieved docs
+# USED INSTEAD OF RAGAS.EVALUATE()
 def _calculate_faithfulness_nllm(result: dict) -> float:
     if not result["answerable"]:
         return None
@@ -202,4 +192,5 @@ def _calculate_faithfulness_nllm(result: dict) -> float:
     if not scores:
         return 0.0
 
-    return float(max(scores))   # or average(scores)
+    # can also use avg
+    return float(max(scores))

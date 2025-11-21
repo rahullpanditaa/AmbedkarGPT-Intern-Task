@@ -1,21 +1,18 @@
 import json
 import time
 from lib.rag_chain import create_rag_chain_for_config
-from lib.search.search_utils import load_test_dataset
 from langchain_core.documents import Document
 from pathlib import Path
 from lib.metrics.retrieval_metrics import calculate_retrieval_metrics
 from lib.metrics.answer_quality_metrics import calculate_answer_quality_metrics
 from lib.metrics.semantic_metrics import calculate_semantic_metrics
+from lib.utils.constants import (
+    TEST_RESULTS_PATH,
+    AGGREGATED_RESULTS_PATH,
+    CHUNK_CONFIGS
+)
+from lib.utils.helper_functions import load_test_dataset
 
-TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
-AGGREGATED_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "aggregated_results.json"
-
-CHUNK_CONFIGS = {
-    "small":  {"chunk_size": 250, "chunk_overlap": 150},
-    "medium": {"chunk_size": 550, "chunk_overlap": 150},
-    "large":  {"chunk_size": 900, "chunk_overlap": 150},
-}
 """
 Evaluation Orchestrator for AmbedkarGPT RAG System.
 
@@ -127,7 +124,7 @@ def evaluate_config(cfg_name: str):
 
     print(f" - Results for test questions (before evaluation) for config '{cfg_name}' written to '{TEST_RESULTS_PATH.name}'")
 
-def complete_evaluation_metrics(cfg_name: str):
+def complete_evaluation_metrics():
     """
     Executes all evaluation metrics for the given chunking configuration and
     updates the results file with computed metric values.
@@ -141,14 +138,16 @@ def complete_evaluation_metrics(cfg_name: str):
 
     Args:
         cfg_name (str): The chunking configuration to evaluate."""
-    print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")
+    
+    for name in CHUNK_CONFIGS.keys():
+        print(f"\n- Evaluating chunking strategy - '{name.upper()}'...")
 
-    calculate_retrieval_metrics(cfg_name=cfg_name)
-    calculate_answer_quality_metrics(cfg_name=cfg_name)
-    calculate_semantic_metrics(cfg_name=cfg_name)
+        calculate_retrieval_metrics(cfg_name=name)
+        calculate_answer_quality_metrics(cfg_name=name)
+        calculate_semantic_metrics(cfg_name=name)
 
-    print(f"\n- All metrics evaluated for '{cfg_name.upper()}'.")
-    print(f"\n- Saved evaluation results for '{cfg_name.upper()}' to 'data/test_results.json'")
+        print(f"\n- All metrics evaluated for '{name.upper()}'.")
+        print(f"\n- Saved evaluation results for '{name.upper()}' to 'data/test_results.json'")
 
 def aggregate_results(cfg_name: str):
     """

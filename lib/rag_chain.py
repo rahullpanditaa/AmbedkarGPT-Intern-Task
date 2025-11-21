@@ -1,11 +1,10 @@
-from langchain_ollama import OllamaLLM
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-from .search.search_utils import combine_docs, PROMPT, CHROMA_DIRS_PATH
 from .search.search import SemanticSearch
-
-
-# initialize Ollama LLM   
-llm = OllamaLLM(model="mistral")
+from .utils.constants import (
+    PROMPT,
+    LLM_ANSWER_GENERATION
+)
+from .utils.helper_functions import combine_docs
 
 def create_rag_chain_for_config(config_name: str, chunk_size: int, chunk_overlap: int):
     """
@@ -50,7 +49,6 @@ def create_rag_chain_for_config(config_name: str, chunk_size: int, chunk_overlap
         "question": RunnablePassthrough()
     }
 
-    rag_chain = rag_inputs | PROMPT | llm
+    rag_chain = rag_inputs | PROMPT | LLM_ANSWER_GENERATION
 
-    #                 to get actual retrieved chunks
     return rag_chain, retriever

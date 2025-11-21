@@ -1,18 +1,10 @@
-# from lib.evaluation.evaluation import evaluate_config
-from sklearn.metrics.pairwise import cosine_similarity
-from langchain_huggingface import HuggingFaceEmbeddings
-from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
-from pathlib import Path
 import json
-
-TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
-
-CHUNK_CONFIGS = {
-    "small":  {"chunk_size": 250, "chunk_overlap": 150},
-    "medium": {"chunk_size": 550, "chunk_overlap": 150},
-    "large":  {"chunk_size": 900, "chunk_overlap": 150},
-}
-HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+from sklearn.metrics.pairwise import cosine_similarity
+from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+from lib.utils.constants import (
+    TEST_RESULTS_PATH,
+    HF_EMBEDDING
+)
 
 def calculate_semantic_metrics(cfg_name: str):
     """

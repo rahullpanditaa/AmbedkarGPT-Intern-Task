@@ -4,9 +4,9 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.vectorstores import VectorStoreRetriever
-from .search_utils import ( 
-    DATA_DIR_PATH,
-    CHROMA_DIRS_PATH
+from lib.utils.constants import (
+    CHROMA_DIR_PATH,
+    DATA_DIR_PATH
 )
 
 class SemanticSearch: 
@@ -18,10 +18,10 @@ class SemanticSearch:
     def __init__(self, chunk_size, chunk_overlap, persist_dir, model_name="sentence-transformers/all-MiniLM-L6-v2"):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self.persist_dir = CHROMA_DIRS_PATH / persist_dir
+        self.persist_dir = CHROMA_DIR_PATH / persist_dir
         self.model = HuggingFaceEmbeddings(model_name=model_name)
 
-    def build_vector_db(self):
+    def build_vector_db(self) -> VectorStoreRetriever:
         """Creates a Chroma vector DB from scratch, returns its retriever."""
 
         DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
@@ -56,7 +56,7 @@ class SemanticSearch:
                                                            search_kwargs={"k": 5})
         return vector_store_retriever
 
-    def load_or_create_vector_db(self):
+    def load_or_create_vector_db(self) -> VectorStoreRetriever:
         """Loads an existing Chroma DB if available; otherwise, builds a new one."""
 
         if self.persist_dir.exists() and (self.persist_dir / "chroma.sqlite3").exists():

@@ -1,16 +1,29 @@
+# Core Framework
 langchain
-langchain-core
 langchain-community
-langchain-chroma
-langchain-huggingface
+langchain-core
 langchain-ollama
-langchain-text-splitters
+langchain-huggingface
 
+# Vector Store
 chromadb
+
+# Data / NLP Utilities
+# datasets
+numpy
+scikit-learn
+nltk
+
+# Embeddings
 sentence-transformers
-transformers
 huggingface-hub
 
-numpy
-pydantic
-typing-extensions
+# LLM Backend
+ollama
+
+# Evaluation
+ragas==0.3.9
+rouge-score
+
+# General
+# pydantic

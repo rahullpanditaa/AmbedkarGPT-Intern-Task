@@ -51,7 +51,7 @@ def evaluate_config(cfg_name: str):
         # generate an answer to test question
         answer = rag_chain.invoke(question)
 
-        time.sleep(4.0)
+        time.sleep(5.0)
 
         results.append({
             "id": q["id"],
@@ -78,7 +78,7 @@ def evaluate_config(cfg_name: str):
     with open(TEST_RESULTS_PATH, "w") as f:
         json.dump(results_before_eval, f, indent=2)
 
-    print(f" - Results for test questions (before evaluation) written to '{TEST_RESULTS_PATH.name}'")
+    print(f" - Results for test questions (before evaluation) for config '{cfg_name}' written to '{TEST_RESULTS_PATH.name}'")
 
 def complete_evaluation_metrics(cfg_name: str):
     print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")

@@ -4,6 +4,8 @@ from rouge_score import rouge_scorer
 from langchain_ollama import OllamaLLM
 from langchain_huggingface import HuggingFaceEmbeddings
 from .semantic_metrics import _calculate_cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
 
@@ -54,7 +56,7 @@ def calculate_answer_quality_metrics(cfg_name: str):
         if result["answerable"]:
             rougeL= _calculate_rouge_score(ground_truth=ground_truth, generated_answer=generated_answer)
             ans_relevance = _calculate_answer_relevance(result)
-            ans_faithfulness = _calculate_faithfulness_custom(result)
+            ans_faithfulness = _calculate_faithfulness_nllm(result)
         else:
             rougeL = None
             ans_relevance = None
@@ -167,7 +169,9 @@ def _calculate_faithfulness_custom(result: dict) -> float:
         answer=result["generated_answer"],
     )
 
-    raw = LLM_METRICS.invoke(prompt)
+    # raw = LLM_METRICS.invoke(prompt)
+    raw = "".join(LLM_METRICS.stream(prompt))
+
     
     # Extract first digit (1–5)
     for ch in raw:
@@ -175,3 +179,27 @@ def _calculate_faithfulness_custom(result: dict) -> float:
             return float(ch)
 
     return 0.0
+
+
+def _calculate_faithfulness_nllm(result: dict) -> float:
+    if not result["answerable"]:
+        return None
+    
+    answer = result["generated_answer"].strip()
+    if answer == "":
+        return 0.0
+
+    # embed answer once
+    ans_emb = HF_EMBEDDING.embed_query(answer)
+
+    # compute cosine similarity with each retrieved doc chunk
+    scores = []
+    for ctx in result["contexts"]:
+        ctx_emb = HF_EMBEDDING.embed_query(ctx)
+        sim = cosine_similarity([ans_emb], [ctx_emb])[0][0]
+        scores.append(sim)
+
+    if not scores:
+        return 0.0
+
+    return float(max(scores))   # or average(scores)

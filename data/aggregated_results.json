@@ -1,0 +1,32 @@
+{
+  "small": {
+    "avg_hit_rate": 1.0,
+    "avg_precision": 0.6363636363636364,
+    "avg_mrr": 0.8598484848484848,
+    "avg_rougeL": 0.19934010829959342,
+    "avg_relevance": 0.7328727311267493,
+    "avg_faithfulness": 4.2727272727272725,
+    "avg_cosine_similarity": 0.5509082759934991,
+    "avg_bleu": 0.042944055742434865
+  },
+  "medium": {
+    "avg_hit_rate": 1.0,
+    "avg_precision": 0.4455,
+    "avg_mrr": 0.947,
+    "avg_rougeL": 0.1865,
+    "avg_relevance": 0.7293,
+    "avg_faithfulness": 0.675,
+    "avg_cosine_similarity": 0.5434,
+    "avg_bleu": 0.0345
+  },
+  "large": {
+    "avg_hit_rate": 1.0,
+    "avg_precision": 0.2727,
+    "avg_mrr": 0.9242,
+    "avg_rougeL": 0.205,
+    "avg_relevance": 0.7084,
+    "avg_faithfulness": 0.6889,
+    "avg_cosine_similarity": 0.5401,
+    "avg_bleu": 0.0526
+  }
+}

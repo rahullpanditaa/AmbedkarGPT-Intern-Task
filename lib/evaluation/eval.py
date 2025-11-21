@@ -143,7 +143,7 @@ def complete_evaluation_metrics(cfg_name: str):
         cfg_name (str): The chunking configuration to evaluate."""
     print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")
 
-    # calculate_retrieval_metrics(cfg_name=cfg_name)
+    calculate_retrieval_metrics(cfg_name=cfg_name)
     calculate_answer_quality_metrics(cfg_name=cfg_name)
     calculate_semantic_metrics(cfg_name=cfg_name)
 
@@ -227,5 +227,5 @@ def _calculate_avg_for_each_metric(results: list[dict], metric: str) -> float:
             metric_sum += value
             metric_count += 1
 
-    return metric_sum / metric_count if metric_count > 0 else 0.0
+    return round(metric_sum / metric_count, 4) if metric_count > 0 else 0.0
     

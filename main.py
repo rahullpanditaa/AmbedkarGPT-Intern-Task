@@ -4,8 +4,8 @@ import ragas
 
 
 def main():
-    complete_evaluation_metrics(cfg_name="small")
-    aggregate_results(cfg_name="small")
+    complete_evaluation_metrics(cfg_name="large")
+    aggregate_results(cfg_name="large")
 
 
 if __name__ == "__main__":

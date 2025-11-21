@@ -18,8 +18,9 @@ CHUNK_CONFIGS = {
 }
 
 
-def evaluate_config(cfg_name):
-    print(f"- Computing results for all test questions (pre evaluation metrics)...")
+def evaluate_config(cfg_name: str):
+    print(f"- Computing results for all test questions (pre evaluation metrics calculation)...")
+    print(f"- chunk config - '{cfg_name.upper()}'")
     cfg_to_use = CHUNK_CONFIGS[cfg_name]
     rag_chain, retriever = create_rag_chain_for_config(
         config_name=cfg_name,
@@ -50,7 +51,7 @@ def evaluate_config(cfg_name):
         # generate an answer to test question
         answer = rag_chain.invoke(question)
 
-        time.sleep(5.0)
+        time.sleep(4.0)
 
         results.append({
             "id": q["id"],

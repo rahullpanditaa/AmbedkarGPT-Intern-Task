@@ -5,8 +5,10 @@ from ragas.metrics import answer_relevancy, faithfulness
 from ragas import evaluate
 from datasets import Dataset
 from langchain_ollama import OllamaLLM
+from ragas.llms import llm_factory, InstructorLLM
 from langchain_huggingface import HuggingFaceEmbeddings
 from ragas.run_config import RunConfig
+from ragas.metrics.collections import Faithfulness, AnswerRelevancy
 
 import os
 os.environ["OPENAI_API_KEY"] = "0"   # forces ragas to NOT use OpenAI embeddings
@@ -19,8 +21,11 @@ CHUNK_CONFIGS = {
 }
 
 HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-# LLM = OllamaLLM(model="mistral")
-LLM = OllamaLLM(model="deepseek-r1:1.5b")
+LLM = OllamaLLM(model="phi3:mini", keep_alive="120m")
+# LLM = llm_factory()
+# scorer_faithfulness = Faithfulness(llm=LLM)
+# scorer_relevancy = AnswerRelevancy(llm=LLM, embeddings=HF_EMBEDDING)
+
 
 RAGAS_RUN_CONFIG = RunConfig(   
     timeout=120,     # seconds per operation
@@ -52,9 +57,9 @@ def calculate_answer_quality_metrics(cfg_name: str):
         
         # ans_relevance_and_faithfulness = _calculate_answer_relevance(result=result) if result["answerable"] else None
         
-        # ans_faithfulness = _calculate_answer_faithfulness(result=result) if result["answerable"] else None
+        ans_faithfulness = _calculate_answer_faithfulness(result=result) if result["answerable"] else None
 
-        ans = _calculate_answer_relevance_and_faithfulness(result=result) if result["answerable"] else None
+        ans_relevance = _calculate_answer_relevance(result=result) if result["answerable"] else None
 
 
         # temporarily disable
@@ -62,8 +67,8 @@ def calculate_answer_quality_metrics(cfg_name: str):
 
         new_result = result.copy()
         new_result["rougeL"] = rougeL
-        new_result["answer_relevance"] = ans[0]["answer_relevancy"] if ans else None
-        new_result["faithfulness"] = ans[0]["faithfulness"] if ans else None
+        new_result["answer_relevance"] = ans_relevance if ans_relevance else None
+        new_result["faithfulness"] = ans_faithfulness if ans_faithfulness else None
         updated_cfg_results.append(new_result)
     
     # updated_results = {}
@@ -99,7 +104,43 @@ def _calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
 # answer relevance - check whether the generated answer is
 # actually about the question i.e semantic alignment b/w
 # question and answer
-def _calculate_answer_relevance_and_faithfulness(result: dict) -> list[dict]:
+def _calculate_answer_relevance(result: dict) -> list[dict]:
+    if result["generated_answer"].strip() == "":
+        return 0.0
+    
+    # result_score = scorer_relevancy.score(
+    #     user_input=result["question"],
+    #     response=result["generated_answer"]
+    # )
+
+    # return result_score.value
+
+    data = {
+        "question": [result["question"]],
+        "answer": [result["generated_answer"]],
+        "contexts": [result["contexts"]]
+    }
+    dataset = Dataset.from_dict(data)
+    # # llm = OllamaLLM(model="deepseek-r1:1.5b")
+    # # llm = OllamaLLM(model="mistral")
+    scores = evaluate(dataset=dataset, 
+                      metrics=[answer_relevancy, faithfulness], 
+                      llm=LLM, 
+                      embeddings=HF_EMBEDDING,
+                      run_config=RAGAS_RUN_CONFIG,
+                      show_progress=False)
+    return float(scores.scores[0]["answer_relevancy"])
+
+    # # time.sleep(5.0)
+    
+    # # return float(scores["answer_relevancy"])
+    # return scores.scores
+
+# faithfulness - check for hallucinations. Factual consistence
+# of response relative to the retrieved context
+# response considered faithful if all claims in it can be 
+# supported by retrieved docs
+def _calculate_answer_faithfulness(result: dict):
     if result["generated_answer"].strip() == "":
         return 0.0
     data = {
@@ -107,47 +148,29 @@ def _calculate_answer_relevance_and_faithfulness(result: dict) -> list[dict]:
         "answer": [result["generated_answer"]],
         "contexts": [result["contexts"]]
     }
+
+    # result_score = scorer_faithfulness.score(
+    #     user_input=result["question"],
+    #     response=result["generated_answer"],
+    #     retrieved_contexts=result["contexts"]
+    # )
+
+    # return result_score.value
+
     dataset = Dataset.from_dict(data)
-    # llm = OllamaLLM(model="deepseek-r1:1.5b")
-    # llm = OllamaLLM(model="mistral")
-    scores = evaluate(dataset=dataset, 
-                      metrics=[answer_relevancy, faithfulness], 
-                      llm=LLM, 
+    # # llm = OllamaLLM(model="deepseek-r1:1.5b")
+    # # llm = OllamaLLM(model="mistral")
+    scores = evaluate(dataset, 
+                      metrics=[faithfulness], 
+                      llm=LLM,
                       embeddings=HF_EMBEDDING,
                       run_config=RAGAS_RUN_CONFIG,
                       show_progress=False)
 
-    # time.sleep(5.0)
-    
-    # return float(scores["answer_relevancy"])
-    return scores.scores
+    # # time.sleep(15.0)
 
-# faithfulness - check for hallucinations. Factual consistence
-# of response relative to the retrieved context
-# response considered faithful if all claims in it can be 
-# supported by retrieved docs
-# def _calculate_answer_faithfulness(result: dict):
-#     if result["generated_answer"].strip() == "":
-#         return 0.0
-#     data = {
-#         "question": [result["question"]],
-#         "answer": [result["generated_answer"]],
-#         "contexts": [result["contexts"]]
-#     }
+    # # return float(scores["faithfulness"])
+    return float(scores.scores[0]["faithfulness"])
 
-#     dataset = Dataset.from_dict(data)
-#     # llm = OllamaLLM(model="deepseek-r1:1.5b")
-#     # llm = OllamaLLM(model="mistral")
-#     scores = evaluate(dataset, 
-#                       metrics=[faithfulness], 
-#                       llm=LLM,
-#                       embeddings=HF_EMBEDDING,
-#                       run_config=RAGAS_RUN_CONFIG,
-#                       show_progress=False)
-
-#     # time.sleep(15.0)
-
-#     # return float(scores["faithfulness"])
-#     return float(scores.scores[0]["faithfulness"])
 
 

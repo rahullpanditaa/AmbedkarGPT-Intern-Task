@@ -27,7 +27,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.4,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.1978021978021978,
+      "answer_relevance": 0.7523854512562388,
+      "faithfulness": 5.0
     },
     {
       "id": 2,
@@ -56,7 +59,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 1.0,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.22857142857142856,
+      "answer_relevance": 0.6700213656900622,
+      "faithfulness": 5.0
     },
     {
       "id": 3,
@@ -85,7 +91,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.8,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.21739130434782608,
+      "answer_relevance": 0.7700714947287737,
+      "faithfulness": 4.0
     },
     {
       "id": 4,
@@ -114,7 +123,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.2,
-      "mrr": 0.5
+      "mrr": 0.5,
+      "rougeL": 0.18666666666666668,
+      "answer_relevance": 0.787593961177106,
+      "faithfulness": 5.0
     },
     {
       "id": 5,
@@ -143,7 +155,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 1.0,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.20967741935483872,
+      "answer_relevance": 0.7654979108633155,
+      "faithfulness": 5.0
     },
     {
       "id": 6,
@@ -172,7 +187,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.8,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.2127659574468085,
+      "answer_relevance": 0.6906320116508577,
+      "faithfulness": 5.0
     },
     {
       "id": 7,
@@ -202,7 +220,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 1.0,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.14035087719298248,
+      "answer_relevance": 0.6405627652641338,
+      "faithfulness": 5.0
     },
     {
       "id": 8,
@@ -232,7 +253,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.2,
-      "mrr": 0.3333333333333333
+      "mrr": 0.3333333333333333,
+      "rougeL": 0.053097345132743355,
+      "answer_relevance": 0.7230990605448504,
+      "faithfulness": 1.0
     },
     {
       "id": 9,
@@ -262,7 +286,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.4,
-      "mrr": 0.3333333333333333
+      "mrr": 0.3333333333333333,
+      "rougeL": 0.11764705882352942,
+      "answer_relevance": 0.7382901076842165,
+      "faithfulness": 1.0
     },
     {
       "id": 10,
@@ -289,7 +316,10 @@
       "answerable": false,
       "hit_rate": null,
       "precision_at_5": null,
-      "mrr": null
+      "mrr": null,
+      "rougeL": null,
+      "answer_relevance": null,
+      "faithfulness": null
     },
     {
       "id": 11,
@@ -316,7 +346,10 @@
       "answerable": false,
       "hit_rate": null,
       "precision_at_5": null,
-      "mrr": null
+      "mrr": null,
+      "rougeL": null,
+      "answer_relevance": null,
+      "faithfulness": null
     },
     {
       "id": 12,
@@ -345,7 +378,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.8,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.16666666666666666,
+      "answer_relevance": 0.6317729812665622,
+      "faithfulness": 5.0
     },
     {
       "id": 13,
@@ -374,7 +410,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.4,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.2985074626865672,
+      "answer_relevance": 0.6254396516310331,
+      "faithfulness": 4.0
     },
     {
       "id": 14,
@@ -403,7 +442,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.6,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.2772277227722772,
+      "answer_relevance": 0.800498052297114,
+      "faithfulness": 5.0
     },
     {
       "id": 15,
@@ -432,7 +474,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.4,
-      "mrr": 0.5
+      "mrr": 0.5,
+      "rougeL": 0.27272727272727276,
+      "answer_relevance": 0.7703396502863098,
+      "faithfulness": 5.0
     },
     {
       "id": 16,
@@ -461,7 +506,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.6,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.39080459770114945,
+      "answer_relevance": 0.6727258093412715,
+      "faithfulness": 5.0
     },
     {
       "id": 17,
@@ -490,7 +538,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.8,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.12307692307692307,
+      "answer_relevance": 0.6652877122190755,
+      "faithfulness": 5.0
     },
     {
       "id": 18,
@@ -520,7 +571,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.4,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.1504424778761062,
+      "answer_relevance": 0.6088930510138275,
+      "faithfulness": 2.0
     },
     {
       "id": 19,
@@ -550,7 +604,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.6,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.11214953271028037,
+      "answer_relevance": 0.7891651980825385,
+      "faithfulness": 5.0
     },
     {
       "id": 20,
@@ -580,7 +637,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 1.0,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.09803921568627451,
+      "answer_relevance": 0.8222296688637211,
+      "faithfulness": 5.0
     },
     {
       "id": 21,
@@ -607,7 +667,10 @@
       "answerable": false,
       "hit_rate": null,
       "precision_at_5": null,
-      "mrr": null
+      "mrr": null,
+      "rougeL": null,
+      "answer_relevance": null,
+      "faithfulness": null
     },
     {
       "id": 22,
@@ -636,7 +699,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.2,
-      "mrr": 0.25
+      "mrr": 0.25,
+      "rougeL": 0.31746031746031744,
+      "answer_relevance": 0.7639763269019906,
+      "faithfulness": 5.0
     },
     {
       "id": 23,
@@ -665,7 +731,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.6,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.2857142857142857,
+      "answer_relevance": 0.836803731893284,
+      "faithfulness": 5.0
     },
     {
       "id": 24,
@@ -694,7 +763,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 1.0,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.20869565217391306,
+      "answer_relevance": 0.7821129536241938,
+      "faithfulness": 5.0
     },
     {
       "id": 25,
@@ -723,7 +795,10 @@
       "answerable": true,
       "hit_rate": 1,
       "precision_at_5": 0.8,
-      "mrr": 1.0
+      "mrr": 1.0,
+      "rougeL": 0.12000000000000001,
+      "answer_relevance": 0.8158011685080084,
+      "faithfulness": 2.0
     }
   ],
   "medium": [

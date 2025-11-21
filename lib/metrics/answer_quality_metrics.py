@@ -1,15 +1,10 @@
 import json
 from pathlib import Path
 from rouge_score import rouge_scorer
-from ragas.metrics import answer_relevancy, faithfulness
-from ragas import evaluate
-from datasets import Dataset
 from langchain_ollama import OllamaLLM
 from langchain_huggingface import HuggingFaceEmbeddings
-from ragas.run_config import RunConfig
+from .semantic_metrics import _calculate_cosine_similarity
 
-import os
-os.environ["OPENAI_API_KEY"] = "0"   # forces ragas to NOT use OpenAI embeddings
 TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
 
 CHUNK_CONFIGS = {
@@ -19,10 +14,7 @@ CHUNK_CONFIGS = {
 }
 
 HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-LLM_METRICS = OllamaLLM(model="phi3:mini")
-
-RAGAS_RUN_CONFIG = RunConfig(max_workers=1)
-
+LLM_METRICS = OllamaLLM(model="phi3:mini", keep_alive="60m")
 
 def calculate_answer_quality_metrics(cfg_name: str):
     """
@@ -34,6 +26,8 @@ def calculate_answer_quality_metrics(cfg_name: str):
     - Loads previously generated RAG outputs for the selected chunk config.
     - Computes ROUGE-L between ground truth and generated answer.
     - Uses RAGAS to compute answer relevance and faithfulness using a local LLM.
+    - Computes semantic relevance using cosine similarity (Temporary fix)
+    - Computes faithfulness using a custom LLM-scored rubric (Temporary fix)
     - Inserts the measured metrics back into the results structure and saves.
 
     Args:
@@ -54,20 +48,23 @@ def calculate_answer_quality_metrics(cfg_name: str):
 
     updated_cfg_results = []
 
-    for result in cfg_results:
+    for i, result in enumerate(cfg_results, 1):
         ground_truth = result["ground_truth"]
         generated_answer = result["generated_answer"]
-        rougeL = _calculate_rouge_score(ground_truth=ground_truth,
-                                        generated_answer=generated_answer) if result["answerable"] else None  
         if result["answerable"]:
-            ans_relevance, ans_faithfulness = _calculate_answer_relevance_and_faithfulness(result)
+            rougeL= _calculate_rouge_score(ground_truth=ground_truth, generated_answer=generated_answer)
+            ans_relevance = _calculate_answer_relevance(result)
+            ans_faithfulness = _calculate_faithfulness_custom(result)
         else:
-            ans_relevance, ans_faithfulness = None, None       
+            rougeL = None
+            ans_relevance = None
+            ans_faithfulness = None  
         new_result = result.copy()
         new_result["rougeL"] = rougeL
         new_result["answer_relevance"] = ans_relevance
         new_result["faithfulness"] = ans_faithfulness
         updated_cfg_results.append(new_result)
+        print(f"- Calculated answer quality metrics for test question {i} ✔️")
     
     all_results[cfg_name] = updated_cfg_results
 
@@ -114,42 +111,67 @@ def _calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
 # of response relative to the retrieved context
 # response considered faithful if all claims in it can be 
 # supported by retrieved docs
-def _calculate_answer_relevance_and_faithfulness(result: dict) -> tuple[float, float]:
+def _calculate_answer_relevance(result: dict) -> float:
     """
-    Computes both answer relevance and faithfulness for a single question using
-    the RAGAS evaluation framework.
-
-    - Relevance measures how well the generated answer semantically aligns with
-      the question.
-    - Faithfulness measures whether the answer is grounded in the retrieved
-      context (hallucination check).
-
-    Both metrics are computed in a single RAGAS `evaluate()` call to avoid
-    duplicate LLM or embedding computations.
-
-    Args:
-        result (dict): A single test result entry containing at minimum:
-            - "question"
-            - "generated_answer"
-            - "contexts" (retrieved document texts)
+    Computes semantic relevance using cosine similarity
 
     Returns:
-        tuple[float, float]: (answer_relevance, faithfulness)
-            Returns (0.0, 0.0) if the generated answer is empty"""
+        float or None
+    """
+    if not result["answerable"]:
+        return None
+    
+    if result["generated_answer"].strip() == "":
+        return 0.0
+    
+    relevance = _calculate_cosine_similarity(
+    ground_truth=result["question"],
+    generated_answer=result["generated_answer"])
+
+    return relevance
+
+FAITHFULNESS_PROMPT = """
+You are evaluating whether an answer is faithful to the provided context.
+
+CONTEXT:
+{context}
+
+QUESTION:
+{question}
+
+ANSWER:
+{answer}
+
+Score from 1 to 5:
+1 = Completely hallucinated or unsupported
+2 = Mostly unsupported with minor grounding
+3 = Partially supported but contains some unsupported claims
+4 = Mostly supported with minor hallucination
+5 = Fully supported by the context, no hallucinations
+
+Respond with only a single integer.
+"""
+
+def _calculate_faithfulness_custom(result: dict) -> float:
+    if not result["answerable"]:
+        return None
+    
     if result["generated_answer"].strip() == "":
         return 0.0
 
-    data = {
-        "question": [result["question"]],
-        "answer": [result["generated_answer"]],
-        "contexts": [result["contexts"]]
-    }
-    dataset = Dataset.from_dict(data)
-    scores = evaluate(dataset=dataset, 
-                      metrics=[answer_relevancy, faithfulness], 
-                      llm=LLM_METRICS, 
-                      embeddings=HF_EMBEDDING,
-                      run_config=RAGAS_RUN_CONFIG,
-                      show_progress=False)
-    row = scores.scores[0]
-    return float(row["answer_relevancy"]), float(row["faithfulness"])
+    context = "\n\n".join(result["contexts"])
+
+    prompt = FAITHFULNESS_PROMPT.format(
+        context=context,
+        question=result["question"],
+        answer=result["generated_answer"],
+    )
+
+    raw = LLM_METRICS.invoke(prompt)
+    
+    # Extract first digit (1–5)
+    for ch in raw:
+        if ch in "12345":
+            return float(ch)
+
+    return 0.0

@@ -114,7 +114,7 @@ def _calculate_bleu_score(ground_truth: str, generated_answer: str):
     gt = ground_truth.lower().split()
     ans = generated_answer.lower().split()
 
-    sm = SmoothingFunction().method1()
+    sm = SmoothingFunction().method1
 
     bleu = sentence_bleu(references=[gt], hypothesis=ans, smoothing_function=sm)
 

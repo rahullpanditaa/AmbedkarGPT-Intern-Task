@@ -133,6 +133,7 @@ def complete_evaluation_metrics(cfg_name: str):
     updates the results file with computed metric values.
 
     This function runs:
+    - Retrieval metrics (Hit rate, Precision@K, MRR)
     - Answer quality metrics (ROUGE-L, relevance, faithfulness).
     - Semantic metrics (cosine similarity, BLEU).
 

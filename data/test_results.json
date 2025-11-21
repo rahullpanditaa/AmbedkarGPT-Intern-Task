@@ -24,7 +24,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.4,
+      "mrr": 1.0
     },
     {
       "id": 2,
@@ -50,7 +53,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 1.0,
+      "mrr": 1.0
     },
     {
       "id": 3,
@@ -76,7 +82,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.8,
+      "mrr": 1.0
     },
     {
       "id": 4,
@@ -102,7 +111,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.2,
+      "mrr": 0.5
     },
     {
       "id": 5,
@@ -128,7 +140,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 1.0,
+      "mrr": 1.0
     },
     {
       "id": 6,
@@ -154,7 +169,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.8,
+      "mrr": 1.0
     },
     {
       "id": 7,
@@ -181,7 +199,10 @@
       ],
       "chunk_config": "small",
       "question_type": "comparative",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 1.0,
+      "mrr": 1.0
     },
     {
       "id": 8,
@@ -208,7 +229,10 @@
       ],
       "chunk_config": "small",
       "question_type": "conceptual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.2,
+      "mrr": 0.3333333333333333
     },
     {
       "id": 9,
@@ -235,7 +259,10 @@
       ],
       "chunk_config": "small",
       "question_type": "comparative",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.4,
+      "mrr": 0.3333333333333333
     },
     {
       "id": 10,
@@ -259,7 +286,10 @@
       ],
       "chunk_config": "small",
       "question_type": "unanswerable",
-      "answerable": false
+      "answerable": false,
+      "hit_rate": null,
+      "precision_at_5": null,
+      "mrr": null
     },
     {
       "id": 11,
@@ -283,7 +313,10 @@
       ],
       "chunk_config": "small",
       "question_type": "unanswerable",
-      "answerable": false
+      "answerable": false,
+      "hit_rate": null,
+      "precision_at_5": null,
+      "mrr": null
     },
     {
       "id": 12,
@@ -309,7 +342,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.8,
+      "mrr": 1.0
     },
     {
       "id": 13,
@@ -335,7 +371,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.4,
+      "mrr": 1.0
     },
     {
       "id": 14,
@@ -361,7 +400,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.6,
+      "mrr": 1.0
     },
     {
       "id": 15,
@@ -387,7 +429,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.4,
+      "mrr": 0.5
     },
     {
       "id": 16,
@@ -413,7 +458,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.6,
+      "mrr": 1.0
     },
     {
       "id": 17,
@@ -439,7 +487,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.8,
+      "mrr": 1.0
     },
     {
       "id": 18,
@@ -466,7 +517,10 @@
       ],
       "chunk_config": "small",
       "question_type": "comparative",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.4,
+      "mrr": 1.0
     },
     {
       "id": 19,
@@ -493,7 +547,10 @@
       ],
       "chunk_config": "small",
       "question_type": "comparative",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.6,
+      "mrr": 1.0
     },
     {
       "id": 20,
@@ -520,7 +577,10 @@
       ],
       "chunk_config": "small",
       "question_type": "conceptual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 1.0,
+      "mrr": 1.0
     },
     {
       "id": 21,
@@ -544,7 +604,10 @@
       ],
       "chunk_config": "small",
       "question_type": "unanswerable",
-      "answerable": false
+      "answerable": false,
+      "hit_rate": null,
+      "precision_at_5": null,
+      "mrr": null
     },
     {
       "id": 22,
@@ -570,7 +633,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.2,
+      "mrr": 0.25
     },
     {
       "id": 23,
@@ -596,7 +662,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.6,
+      "mrr": 1.0
     },
     {
       "id": 24,
@@ -622,7 +691,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 1.0,
+      "mrr": 1.0
     },
     {
       "id": 25,
@@ -648,7 +720,10 @@
       ],
       "chunk_config": "small",
       "question_type": "factual",
-      "answerable": true
+      "answerable": true,
+      "hit_rate": 1,
+      "precision_at_5": 0.8,
+      "mrr": 1.0
     }
   ]
 }

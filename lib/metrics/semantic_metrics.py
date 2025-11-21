@@ -15,26 +15,24 @@ CHUNK_CONFIGS = {
 HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 def calculate_semantic_metrics(cfg_name: str):
-    # results: list[dict] = evaluate_config(cfg_name=config_name.lower(),
-                            #   config=CHUNK_CONFIGS[config_name.lower()])
-
+    print(f"\n- Calculating Semantic metrics for chunking config '{cfg_name.upper()}'...")
+    # Load existing results
     if TEST_RESULTS_PATH.exists():
         with open(TEST_RESULTS_PATH, "r") as f:
-            previous_test_results = json.load(f)
+            all_results = json.load(f)
     else:
-        previous_test_results = {}
+        all_results = {}
 
-    # previous_test_results is either an empty dict
-    # OR, it is a dict with at least 1 key value pair
-    # where key=config_name (small, medium, or large)
-    # value = list[dict] -> results per test_qustion so far
+    # Safety check: ensure this config exists
+    if cfg_name not in all_results:
+        print(f"No base results found for config '{cfg_name}'. Run evaluate_config() first.")
+        return
 
-    if cfg_name in previous_test_results.keys():
-        cfg_results_so_far = previous_test_results.get(cfg_name)  
-    
-    results_with_semantic_metrics = []
+    cfg_results = all_results[cfg_name]   # list of all test question results
 
-    for result in cfg_results_so_far:
+    updated_cfg_results = []
+
+    for result in cfg_results:
         ground_truth = result["ground_truth"]
         generated_answer = result["generated_answer"]
 
@@ -46,14 +44,15 @@ def calculate_semantic_metrics(cfg_name: str):
         new_result = result.copy()
         new_result["cosine_similarity"] = cos_sim
         new_result["bleu_score"] = bleu_score
-        results_with_semantic_metrics.append(new_result)
+        updated_cfg_results.append(new_result)
 
-    updated_results = {}
-    updated_results[cfg_name] = results_with_semantic_metrics
+    # updated_results = {}
+    # updated_results[cfg_name] = updated_cfg_results
+    all_results[cfg_name] = updated_cfg_results
 
     # save updated results
     with open(TEST_RESULTS_PATH, "w") as f:
-        json.dump(updated_results, f, indent=2)
+        json.dump(all_results, f, indent=2)
 
     print(f"\n- Updated results, saved Semantic metrics, file at '{TEST_RESULTS_PATH.name}'. ")
 

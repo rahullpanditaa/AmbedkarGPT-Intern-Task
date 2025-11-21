@@ -18,12 +18,17 @@ CHUNK_CONFIGS = {
 }
 
 
-def evaluate_config(cfg_name, config):
+def evaluate_config(cfg_name):
+    print(f"- Computing results for all test questions (pre evaluation metrics)...")
+    cfg_to_use = CHUNK_CONFIGS[cfg_name]
     rag_chain, retriever = create_rag_chain_for_config(
         config_name=cfg_name,
-        chunk_size=config['chunk_size'],
-        chunk_overlap=config['chunk_overlap']
+        chunk_size=cfg_to_use['chunk_size'],
+        chunk_overlap=cfg_to_use['chunk_overlap']
     )
+
+    # docs = retriever.invoke("What is the remedy for caste system?")
+    # print(docs)
 
     test_dataset_questions = load_test_dataset()
     results = []
@@ -36,12 +41,16 @@ def evaluate_config(cfg_name, config):
         source_docs = q["source_documents"]
 
         # retrieve relevant docs based on test question
-        retrieved_docs: list[Document] = retriever._get_relevant_documents(query=question, run_manager=None)
+        retrieved_docs: list[Document] = retriever.invoke(question)
         # list of names of sources of retrieved docs
+
         retrieved_source_names = [
-            Path(doc.metadata["source"]).resolve().name
+            Path(doc.metadata.get("source", "unknown")).name
             for doc in retrieved_docs
         ]
+        # retrieved_source_names = []
+        # for doc in retrieved_docs:
+        #     doc_source = doc.metadata["source"]
 
         # generate an answer to test question
         answer = rag_chain.invoke(question)
@@ -75,15 +84,16 @@ def evaluate_config(cfg_name, config):
 
     print(f" - Results for test questions (before evaluation) written to '{TEST_RESULTS_PATH.name}'")
 
-def complete_evaluation(cfg_name: str):
+def complete_evaluation_metrics(cfg_name: str):
     # cfg_results = {}
 
     print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")
-    evaluate_config(cfg_name=cfg_name, config=CHUNK_CONFIGS[cfg_name])
+    # evaluate_config(cfg_name=cfg_name)
     
     calculate_retrieval_metrics(cfg_name=cfg_name)
     calculate_answer_quality_metrics(cfg_name=cfg_name)
     calculate_semantic_metrics(cfg_name=cfg_name)
+    print(f"\n- All metrics evaluated for '{cfg_name.upper()}'.")
     
 
 

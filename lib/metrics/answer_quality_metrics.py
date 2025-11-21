@@ -29,23 +29,22 @@ RAGAS_RUN_CONFIG = RunConfig(
 def calculate_answer_quality_metrics(cfg_name: str):
     # results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
 
+    print(f"\n- Calculating Answer Quality metrics for chunking config '{cfg_name.upper()}'...")
     if TEST_RESULTS_PATH.exists():
         with open(TEST_RESULTS_PATH, "r") as f:
-            previous_test_results = json.load(f)
+            all_results = json.load(f)
     else:
-        previous_test_results = {}
+        all_results = {}
 
-    # previous_test_results is either an empty dict
-    # OR, it is a dict with at least 1 key value pair
-    # where key=config_name (small, medium, or large)
-    # value = list[dict] -> results per test_question so far
+    if cfg_name not in all_results:
+        print(f"No base results found for config '{cfg_name}'. Run evaluate_config() first.")
+        return
 
-    if cfg_name in previous_test_results.keys():
-        cfg_results_so_far = previous_test_results.get(cfg_name)
-    
-    results_with_answer_quality_metrics = []
+    cfg_results = all_results[cfg_name]
 
-    for result in cfg_results_so_far:
+    updated_cfg_results = []
+
+    for result in cfg_results:
         ground_truth = result["ground_truth"]
         generated_answer = result["generated_answer"]
         rougeL = _calculate_rouge_score(ground_truth=ground_truth,
@@ -65,14 +64,15 @@ def calculate_answer_quality_metrics(cfg_name: str):
         new_result["rougeL"] = rougeL
         new_result["answer_relevance"] = ans[0]["answer_relevancy"] if ans else None
         new_result["faithfulness"] = ans[0]["faithfulness"] if ans else None
-        results_with_answer_quality_metrics.append(new_result)
+        updated_cfg_results.append(new_result)
     
-    updated_results = {}
-    updated_results[cfg_name] = results_with_answer_quality_metrics
+    # updated_results = {}
+    # updated_results[cfg_name] = results_with_answer_quality_metrics
+    all_results[cfg_name] = updated_cfg_results
 
     # save updated results
     with open(TEST_RESULTS_PATH, "w") as f:
-        json.dump(updated_results, f, indent=2)
+        json.dump(all_results, f, indent=2)
 
     print(f"\n- Updated results, saved Answer Quality metrics, file at '{TEST_RESULTS_PATH.name}'. ")
     

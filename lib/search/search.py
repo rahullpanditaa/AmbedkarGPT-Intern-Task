@@ -21,7 +21,7 @@ class SemanticSearch:
         self.persist_dir = CHROMA_DIRS_PATH / persist_dir
         self.model = HuggingFaceEmbeddings(model_name=model_name)
 
-    def build_vector_db(self) -> VectorStoreRetriever:
+    def build_vector_db(self):
         """Creates a Chroma vector DB from scratch, returns its retriever."""
 
         DATA_DIR_PATH.mkdir(parents=True, exist_ok=True)
@@ -56,7 +56,7 @@ class SemanticSearch:
                                                            search_kwargs={"k": 5})
         return vector_store_retriever
 
-    def load_or_create_vector_db(self) -> VectorStoreRetriever:
+    def load_or_create_vector_db(self):
         """Loads an existing Chroma DB if available; otherwise, builds a new one."""
 
         if self.persist_dir.exists() and (self.persist_dir / "chroma.sqlite3").exists():

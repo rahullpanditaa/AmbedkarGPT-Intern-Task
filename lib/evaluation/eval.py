@@ -126,18 +126,15 @@ def evaluate_config(cfg_name: str):
 
 def complete_evaluation_metrics():
     """
-    Executes all evaluation metrics for the given chunking configuration and
-    updates the results file with computed metric values.
+    Executes all evaluation metrics for all chunking configurations
+    defined in CHUNK_CONFIGS.
 
-    This function runs:
+    This function runs, for each config:
     - Retrieval metrics (Hit rate, Precision@K, MRR)
-    - Answer quality metrics (ROUGE-L, relevance, faithfulness).
-    - Semantic metrics (cosine similarity, BLEU).
+    - Answer quality metrics (ROUGE-L, relevance, faithfulness)
+    - Semantic metrics (cosine similarity, BLEU)
 
-    Results are written back into `test_results.json`.
-
-    Args:
-        cfg_name (str): The chunking configuration to evaluate."""
+    Results are written back into `test_results.json`."""
     
     for name in CHUNK_CONFIGS.keys():
         print(f"\n- Evaluating chunking strategy - '{name.upper()}'...")

@@ -46,7 +46,7 @@ def evaluate_config(cfg_name, config):
         # generate an answer to test question
         answer = rag_chain.invoke(question)
 
-        time.sleep(8.0)
+        time.sleep(3.0)
 
         results.append({
             "id": q["id"],
@@ -60,32 +60,46 @@ def evaluate_config(cfg_name, config):
             "question_type": q["question_type"],
             "answerable": q["answerable"]
         })
+        
         print(f"- Generated answer for Q{i} ✔️")
 
-    return results
-
-def complete_evaluation(cfg_name: str):
-    cfg_results = {}
-
-    print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")
-    results = evaluate_config(cfg_name=cfg_name, config=CHUNK_CONFIGS[cfg_name])
-    r = calculate_retrieval_metrics(results=results)
-    r = calculate_answer_quality_metrics(results=r)
-    r = calculate_semantic_metrics(results=r)
-    cfg_results[cfg_name] = r
-
-    # if yes, result for at least one config already written
     if TEST_RESULTS_PATH.exists():
         with open(TEST_RESULTS_PATH, "r") as f:
-            test_results = json.load(f)
+            results_before_eval = json.load(f)
     else:
-        test_results = {}
-
-    # merge dicts
-    final_results = test_results | cfg_results
+        results_before_eval = {}
+    results_before_eval[cfg_name] = results
 
     with open(TEST_RESULTS_PATH, "w") as f:
-        json.dump(final_results, f, indent=2)
+        json.dump(results_before_eval, f, indent=2)
+
+    print(f" - Results for test questions (before evaluation) written to '{TEST_RESULTS_PATH.name}'")
+
+def complete_evaluation(cfg_name: str):
+    # cfg_results = {}
+
+    print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")
+    evaluate_config(cfg_name=cfg_name, config=CHUNK_CONFIGS[cfg_name])
+    
+    calculate_retrieval_metrics(cfg_name=cfg_name)
+    calculate_answer_quality_metrics(cfg_name=cfg_name)
+    calculate_semantic_metrics(cfg_name=cfg_name)
+    
+
+
+    # if yes, result for at least one config already written
+    # if TEST_RESULTS_PATH.exists():
+    #     with open(TEST_RESULTS_PATH, "r") as f:
+    #         test_results = json.load(f)
+    # else:
+    #     # empty, OR key=cfg_name, value=all test results for key config name
+    #     test_results = {}
+
+    # # merge dicts
+    # final_results = test_results | cfg_results
+
+    # with open(TEST_RESULTS_PATH, "w") as f:
+    #     json.dump(final_results, f, indent=2)
 
     print(f"\n- Saved evaluation results for '{cfg_name.upper()}' to 'data/test_results.json'")
 
@@ -119,7 +133,7 @@ def aggregate_results(cfg_name: str):
             "avg_mrr": _calculate_avg_for_each_metric(results=cfg_results, metric="mrr"),
             "avg_rougeL": _calculate_avg_for_each_metric(results=cfg_results, metric="rougeL"),
             "avg_relevance": _calculate_avg_for_each_metric(results=cfg_results, metric="answer_relevance"),
-            "avg_faithfulness": 0.0,
+            "avg_faithfulness": _calculate_avg_for_each_metric(results=cfg_results, metric="faithfulness"),
             "avg_cosine_similarity": _calculate_avg_for_each_metric(results=cfg_results, metric="cosine_similarity"),
             "avg_bleu": _calculate_avg_for_each_metric(results=cfg_results, metric="bleu_score"),
         }  

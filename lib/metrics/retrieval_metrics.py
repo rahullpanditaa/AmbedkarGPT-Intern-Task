@@ -1,16 +1,34 @@
+from pathlib import Path
+import json
+
 CHUNK_CONFIGS = {
     "small":  {"chunk_size": 250, "chunk_overlap": 150},
     "medium": {"chunk_size": 550, "chunk_overlap": 150},
     "large":  {"chunk_size": 900, "chunk_overlap": 150},
 }
+TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
 
-
-def calculate_retrieval_metrics(results: list[dict]):
+def calculate_retrieval_metrics(cfg_name: str):
     # results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
 
-    results_with_metrics = []
+    if TEST_RESULTS_PATH.exists():
+        with open(TEST_RESULTS_PATH, "r") as f:
+            previous_test_results = json.load(f)
+    else:
+        previous_test_results = {}
+
+    # previous_test_results is either an empty dict
+    # OR, it is a dict with at least 1 key value pair
+    # where key=config_name (small, medium, or large)
+    # value = list[dict] -> results per test_qustion so far
+
+    if cfg_name in previous_test_results.keys():
+        cfg_results_so_far = previous_test_results.get(cfg_name)   
+
+
+    results_with_retrieval_metrics = []
     
-    for result in results:
+    for result in cfg_results_so_far:
         expected_sources = result["expected_docs_txt_files"]
         retrieved_sources = result["retrieved_docs_txt_files"]
         hit_rate = _calculate_hit_rate(expected_sources=expected_sources,
@@ -25,9 +43,16 @@ def calculate_retrieval_metrics(results: list[dict]):
         new_result[f"precision_at_5"] = precision_score
         new_result["mrr"] = mrr
 
-        results_with_metrics.append(new_result)
+        results_with_retrieval_metrics.append(new_result)
 
-    return results_with_metrics
+    updated_results = {}
+    updated_results[cfg_name] = results_with_retrieval_metrics
+
+    # save updated results
+    with open(TEST_RESULTS_PATH, "w") as f:
+        json.dump(updated_results, f, indent=2)
+
+    print(f"\n- Updated results, saved Retrieval Quality metrics, file at '{TEST_RESULTS_PATH.name}'. ")
 
 def _calculate_hit_rate(expected_sources: list[str], retrieved_sources: list[str]) -> int:
     if len(retrieved_sources) == 0:

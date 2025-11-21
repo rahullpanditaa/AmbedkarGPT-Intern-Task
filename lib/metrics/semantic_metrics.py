@@ -2,6 +2,10 @@
 from sklearn.metrics.pairwise import cosine_similarity
 from langchain_huggingface import HuggingFaceEmbeddings
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+from pathlib import Path
+import json
+
+TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
 
 CHUNK_CONFIGS = {
     "small":  {"chunk_size": 250, "chunk_overlap": 150},
@@ -10,13 +14,27 @@ CHUNK_CONFIGS = {
 }
 HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-def calculate_semantic_metrics(results: list[dict]):
+def calculate_semantic_metrics(cfg_name: str):
     # results: list[dict] = evaluate_config(cfg_name=config_name.lower(),
                             #   config=CHUNK_CONFIGS[config_name.lower()])
+
+    if TEST_RESULTS_PATH.exists():
+        with open(TEST_RESULTS_PATH, "r") as f:
+            previous_test_results = json.load(f)
+    else:
+        previous_test_results = {}
+
+    # previous_test_results is either an empty dict
+    # OR, it is a dict with at least 1 key value pair
+    # where key=config_name (small, medium, or large)
+    # value = list[dict] -> results per test_qustion so far
+
+    if cfg_name in previous_test_results.keys():
+        cfg_results_so_far = previous_test_results.get(cfg_name)  
     
     results_with_semantic_metrics = []
 
-    for result in results:
+    for result in cfg_results_so_far:
         ground_truth = result["ground_truth"]
         generated_answer = result["generated_answer"]
 
@@ -30,7 +48,14 @@ def calculate_semantic_metrics(results: list[dict]):
         new_result["bleu_score"] = bleu_score
         results_with_semantic_metrics.append(new_result)
 
-    return results_with_semantic_metrics
+    updated_results = {}
+    updated_results[cfg_name] = results_with_semantic_metrics
+
+    # save updated results
+    with open(TEST_RESULTS_PATH, "w") as f:
+        json.dump(updated_results, f, indent=2)
+
+    print(f"\n- Updated results, saved Semantic metrics, file at '{TEST_RESULTS_PATH.name}'. ")
 
 
 def _calculate_cosine_similarity(ground_truth: str, generated_answer: str):
@@ -52,18 +77,11 @@ def _calculate_bleu_score(ground_truth: str, generated_answer: str):
         return 0.0
     
     # create ground_truth, answer tokens
-    gt = ground_truth.split()
-    ans = generated_answer.split()
+    gt = ground_truth.lower().split()
+    ans = generated_answer.lower().split()
 
     sm = SmoothingFunction().method1()
 
     bleu = sentence_bleu(references=[gt], hypothesis=ans, smoothing_function=sm)
 
     return float(bleu)
-    # data = {
-    #     "reference": ground_truth,
-    #     "response": generated_answer
-    # }
-
-    # dataset = Dataset.from_dict(data)
-    # result = evaluate(dataset=dataset, metrics=[])

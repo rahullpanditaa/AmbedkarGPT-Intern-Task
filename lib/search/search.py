@@ -62,7 +62,7 @@ class SemanticSearch:
         if self.persist_dir.exists() and (self.persist_dir / "chroma.sqlite3").exists():
             print(f" - Loading vector store from disk at {self.persist_dir.name}...")
             # load db
-            vs = Chroma(collection_name="ambedkar-corpu", 
+            vs = Chroma(collection_name="ambedkar-corpus", 
                         embedding_function=self.model, 
                         persist_directory=str(self.persist_dir))
             print(" - vector store loaded.")

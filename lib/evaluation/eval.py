@@ -27,9 +27,6 @@ def evaluate_config(cfg_name):
         chunk_overlap=cfg_to_use['chunk_overlap']
     )
 
-    # docs = retriever.invoke("What is the remedy for caste system?")
-    # print(docs)
-
     test_dataset_questions = load_test_dataset()
     results = []
 
@@ -42,15 +39,12 @@ def evaluate_config(cfg_name):
 
         # retrieve relevant docs based on test question
         retrieved_docs: list[Document] = retriever.invoke(question)
-        # list of names of sources of retrieved docs
 
+        # list of names of sources of retrieved docs
         retrieved_source_names = [
             Path(doc.metadata.get("source", "unknown")).name
             for doc in retrieved_docs
         ]
-        # retrieved_source_names = []
-        # for doc in retrieved_docs:
-        #     doc_source = doc.metadata["source"]
 
         # generate an answer to test question
         answer = rag_chain.invoke(question)
@@ -85,32 +79,13 @@ def evaluate_config(cfg_name):
     print(f" - Results for test questions (before evaluation) written to '{TEST_RESULTS_PATH.name}'")
 
 def complete_evaluation_metrics(cfg_name: str):
-    # cfg_results = {}
-
     print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")
-    # evaluate_config(cfg_name=cfg_name)
-    
+
     calculate_retrieval_metrics(cfg_name=cfg_name)
     calculate_answer_quality_metrics(cfg_name=cfg_name)
     calculate_semantic_metrics(cfg_name=cfg_name)
+
     print(f"\n- All metrics evaluated for '{cfg_name.upper()}'.")
-    
-
-
-    # if yes, result for at least one config already written
-    # if TEST_RESULTS_PATH.exists():
-    #     with open(TEST_RESULTS_PATH, "r") as f:
-    #         test_results = json.load(f)
-    # else:
-    #     # empty, OR key=cfg_name, value=all test results for key config name
-    #     test_results = {}
-
-    # # merge dicts
-    # final_results = test_results | cfg_results
-
-    # with open(TEST_RESULTS_PATH, "w") as f:
-    #     json.dump(final_results, f, indent=2)
-
     print(f"\n- Saved evaluation results for '{cfg_name.upper()}' to 'data/test_results.json'")
 
 def aggregate_results(cfg_name: str):
@@ -134,9 +109,7 @@ def aggregate_results(cfg_name: str):
     if cfg_results is None:
         print(f"No results found for config '{cfg_name}'.")
         return
-
-    # cfg_results = list[dict]
-    # for result in cfg_results:
+    
     agg_results[cfg_name] = {
             "avg_hit_rate": _calculate_avg_for_each_metric(results=cfg_results, metric="hit_rate"),
             "avg_precision": _calculate_avg_for_each_metric(results=cfg_results, metric="precision_at_5"),

@@ -1,154 +1,172 @@
-# AmbedkarGPT — Internship Task
+# AmbedkarGPT — RAG Evaluation Framework
 
-## Phase 1
+This repository contains the full implementation of a Retrieval-Augmented Generation (RAG) evaluation system. It includes:
 
-A **Retrieval-Augmented Generation (RAG)** system built using **LangChain**, **ChromaDB**, **HuggingFace Embeddings**, and **Ollama (Mistral 7B)**. This project implements a CLI Q&A system that answers questions based solely on an excerpt from Dr. B.R. Ambedkar's *Annihilation of Caste*.
-
----
-
-## 🚀 Features
-
-* Loads a local text file (`speech.txt`)
-* Splits text into overlapping chunks
-* Computes embeddings locally using **sentence-transformers/all-MiniLM-L6-v2**
-* Stores embeddings in a persistent **Chroma vector database**
-* Retrieves relevant chunks using semantic similarity search
-* Passes retrieved context + user question into **Ollama Mistral 7B**
-* Provides grounded answers from the content
+* A complete RAG pipeline using **LangChain**, **ChromaDB**, **HuggingFace Embeddings**, and **Ollama**
+* Automated evaluation across multiple NLP metrics
+* Comparative chunking analysis
+* Aggregated performance reports
+* A detailed results analysis document
 
 ---
 
-## 📦 Project Structure
+# 📌 Project Structure
 
 ```
 AmbedkarGPT-Intern-Task/
 │
+├── corpus/                      # Document corpus (Ambedkar writings)
 ├── data/
-│   └── speech.txt                # Provided text for RAG
+│   ├── test_dataset.json       # Provided test questions
+│   ├── test_results.json       # Per-question evaluation results
+│   └── aggregated_results.json # Metric averages per chunking strategy
 │
-├── lib/                          # Core logic for retrieval + RAG
-│   ├── search.py                 # SemanticSearch class (build/load vector DB)
-│   ├── rag_chain.py              # RAG chain construction
-│   └── search_utils.py           # Helper utilities
+├── lib/
+│   ├── rag_chain.py            # RAG chain construction
+│   ├── search/                 # Vector DB + retriever utilities
+│   ├── metrics/                # Retrieval, answer-quality, semantic metrics
+│   └── evaluation/             # Orchestration logic
 │
-├── vector_db/                    # Chroma persistent DB (ignored in git)
-│   ├── chroma.sqlite3
-│   └── <HNSW index folder>
-│
-├── main.py                       # CLI interface
-├── pyproject.toml                # Dependencies
-├── README.md                     # (this file)
-└── .gitignore                    # Clean repo configuration
+├── results_analysis.md         # Detailed findings & recommendations
+├── requirements.txt
+└── main.py                     # Entry point to run complete evaluation
 ```
 
 ---
 
-## 🛠️ Setup Instructions
+# ✨ Features
 
-### 1. Install Dependencies
+### **1. Retrieval-Augmented Generation (RAG)**
 
-This project uses **uv** as the package manager.
+* Uses **Mistral 7B** (Ollama) for answer generation
+* Embeddings from **all-MiniLM-L6-v2** via HuggingFace
+* Document chunking with configurable sizes (small/medium/large)
+* Vector store persisted with ChromaDB
 
-```bash
+### **2. Comprehensive Evaluation Metrics**
+
+The system computes:
+
+#### **Retrieval Metrics**
+
+* Hit Rate
+* Precision@K
+* Mean Reciprocal Rank (MRR)
+
+#### **Answer Quality Metrics**
+
+> *Note:* Due to instability with RAGAS + local LLMs during testing (timeouts, heating), the following adjustments were made:
+>
+> * **Relevance** computed via cosine similarity instead of RAGAS
+> * **Faithfulness** computed using a custom LLM rubric instead of RAGAS NLI module
+
+* ROUGE-L
+* Answer Relevance (Cosine similarity)
+* Faithfulness (Custom LLM-scored 1–5 scale)
+
+#### **Semantic Metrics**
+
+* Cosine Similarity
+* BLEU Score
+
+---
+
+# 🚀 How to Run
+
+Make sure you have **Ollama** installed and the model downloaded:
+
+```
+ollama pull mistral
+ollama pull phi3:mini
+```
+
+Install dependencies:
+
+```
 uv sync
 ```
 
-### 2. Install Ollama
+Run the complete evaluation:
 
-Linux:
-
-```bash
-curl -fsSL https://ollama.ai/install.sh | sh
 ```
-
-### 3. Pull Mistral 7B
-
-```bash
-ollama pull mistral
-```
-
-Make sure Ollama is running (it usually runs automatically):
-
-```bash
-ps aux | grep ollama
-```
-
----
-
-## ▶️ Running the CLI App
-
-From the project root:
-
-```bash
 uv run main.py
 ```
 
-### Example Session
+This will:
+
+1. Generate answers for all test questions for a given chunk size
+2. Compute retrieval, answer-quality, and semantic metrics
+3. Save results to `data/test_results.json`
+4. Aggregate averages into `data/aggregated_results.json`
+
+---
+
+# 📊 Output Files
+
+### **test_results.json**
+
+Contains detailed per-question evaluation results across:
+
+* Retrieved documents
+* Generated answers
+* Metrics (retrieval, answer quality, semantic)
+
+### **aggregated_results.json**
+
+Contains average values of all metrics across the 25 test questions.
+Example:
 
 ```
-Welcome to AmbedkarGPT.
-Starting REPL...
-> What is caste?
-Caste is described as...
-
-> Why is reform compared to gardening?
-The text explains that...
-
-> exit
+{
+  "small": { "avg_hit_rate": 1.0, ... },
+  "medium": { ... },
+  "large": { ... }
+}
 ```
 
----
+### **results_analysis.md**
 
-## 🧠 How It Works
+Human-readable interpretation of results:
 
-1. **Load the speech text** using LangChain's `TextLoader`.
-2. **Chunk the text** with `CharacterTextSplitter`.
-3. **Embed chunks** using `HuggingFaceEmbeddings` (MiniLM-L6-v2).
-4. **Create/load ChromaDB** to persist embeddings.
-5. **Build a VectorStoreRetriever** for similarity search.
-6. **Assemble the RAG pipeline** using LangChain Runnables:
-
-   * Retrieval → Merge Chunks → Prompt Template → Mistral LLM
-7. **Answer user questions** purely from retrieved context.
+* Which chunk size performed best
+* Failure modes
+* Recommendations
 
 ---
 
-## 📚 Code Overview
+# ⚙️ Chunking Configurations
 
-### 🔹 `SemanticSearch` (vector DB manager)
+You can adjust chunk sizes in:
 
-* Loads `speech.txt`
-* Splits into chunks
-* Creates/loads ChromaDB
-* Returns a `VectorStoreRetriever`
+```
+CHUNK_CONFIGS = {
+  "small":  {"chunk_size": 250, "chunk_overlap": 150},
+  "medium": {"chunk_size": 550, "chunk_overlap": 150},
+  "large":  {"chunk_size": 900, "chunk_overlap": 150}
+}
+```
 
-### 🔹 `create_rag_chain()` (pipeline builder)
-
-* Loads the retriever
-* Prepares a doc-combiner runnable
-* Builds a prompt template
-* Connects everything into a runnable chain
-
-### 🔹 `main.py` (CLI)
-
-* Initializes the RAG chain once
-* Prompts user
-* Invokes the chain with the question
+The evaluation automatically runs per config.
 
 ---
 
-## 🧪 Example Questions to Try
+# 📌 Notes & Limitations
 
-* "What is caste?"
-* "What is the real enemy according to Ambedkar?"
-* "Why does Ambedkar compare social reform work to gardening?"
-* "What must be destroyed to remove caste?"
+* **Mistral 7B** used for *generation only*
+* Local models struggle with RAGAS NLI modules → custom faithfulness metric used
+* Relevance metric replaced with embedding similarity due to repeated timeouts
+* Single-worker evaluation ensures stability on local hardware
+
+These constraints are clearly documented in both the code and results analysis.
 
 ---
 
-## 🧹 .gitignore
+# 📝 Requirements
 
-* vector_db/
-* .venv/
-* **pycache**/
-* uv.lock
+All dependencies are listed in `requirements.txt`.
+
+Install via:
+
+```
+uv pip install -r requirements.txt
+```

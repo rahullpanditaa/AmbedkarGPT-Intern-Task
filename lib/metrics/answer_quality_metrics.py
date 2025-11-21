@@ -19,13 +19,26 @@ CHUNK_CONFIGS = {
 }
 
 HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-LLM_METRICS = OllamaLLM(model="phi3:mini", keep_alive="120m")
+LLM_METRICS = OllamaLLM(model="phi3:mini")
 
-RAGAS_RUN_CONFIG = RunConfig(   
-    timeout=120,     # seconds per operation
-)
+RAGAS_RUN_CONFIG = RunConfig(max_workers=1)
+
 
 def calculate_answer_quality_metrics(cfg_name: str):
+    """
+    Computes answer-quality metrics (ROUGE-L, relevance, faithfulness) for all
+    test questions under a given chunking configuration and updates the
+    `test_results.json` file in place.
+
+    This function:
+    - Loads previously generated RAG outputs for the selected chunk config.
+    - Computes ROUGE-L between ground truth and generated answer.
+    - Uses RAGAS to compute answer relevance and faithfulness using a local LLM.
+    - Inserts the measured metrics back into the results structure and saves.
+
+    Args:
+        cfg_name (str): The name of the chunking configuration whose results
+            should be evaluated. Must be one of {"small", "medium", "large"}."""
     print(f"\n- Calculating Answer Quality metrics for chunking config '{cfg_name.upper()}'...")
     if TEST_RESULTS_PATH.exists():
         with open(TEST_RESULTS_PATH, "r") as f:
@@ -68,6 +81,19 @@ def calculate_answer_quality_metrics(cfg_name: str):
 # generated answer
 scorer_rouge = rouge_scorer.RougeScorer(["rougeL"])
 def _calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
+    """
+    Computes the ROUGE-L F-measure score between the ground truth answer and the
+    generated answer.
+
+    ROUGE-L evaluates the longest common subsequence between the two texts,
+    providing a measure of lexical similarity.
+
+    Args:
+        ground_truth (str): The expected (reference) answer.
+        generated_answer (str): The system-generated answer.
+
+    Returns:
+        float: ROUGE-L F-measure score. Returns 0 if either string is empty"""
     if generated_answer.strip() == "" or ground_truth.strip() == "":
         return 0
     # rouge-l - longest common subsequence b/w the 2 texts
@@ -89,6 +115,27 @@ def _calculate_rouge_score(ground_truth: str, generated_answer: str) -> float:
 # response considered faithful if all claims in it can be 
 # supported by retrieved docs
 def _calculate_answer_relevance_and_faithfulness(result: dict) -> tuple[float, float]:
+    """
+    Computes both answer relevance and faithfulness for a single question using
+    the RAGAS evaluation framework.
+
+    - Relevance measures how well the generated answer semantically aligns with
+      the question.
+    - Faithfulness measures whether the answer is grounded in the retrieved
+      context (hallucination check).
+
+    Both metrics are computed in a single RAGAS `evaluate()` call to avoid
+    duplicate LLM or embedding computations.
+
+    Args:
+        result (dict): A single test result entry containing at minimum:
+            - "question"
+            - "generated_answer"
+            - "contexts" (retrieved document texts)
+
+    Returns:
+        tuple[float, float]: (answer_relevance, faithfulness)
+            Returns (0.0, 0.0) if the generated answer is empty"""
     if result["generated_answer"].strip() == "":
         return 0.0
 

@@ -16,9 +16,56 @@ CHUNK_CONFIGS = {
     "medium": {"chunk_size": 550, "chunk_overlap": 150},
     "large":  {"chunk_size": 900, "chunk_overlap": 150},
 }
+"""
+Evaluation Orchestrator for AmbedkarGPT RAG System.
+
+This module coordinates the full evaluation pipeline for the RAG Q&A system
+across different chunking configurations. It performs three major tasks:
+1. Running inference on the 25-question test dataset to generate answers and
+   retrieval outputs.
+2. Executing all evaluation metrics (retrieval, answer quality, semantic) and
+   writing results to `data/test_results.json`.
+3. Aggregating metric averages across all questions for each chunking strategy
+   and saving them to `data/aggregated_results.json`.
+
+Functions
+---------
+evaluate_config(cfg_name: str)
+    Runs the RAG pipeline for a given chunking configuration, retrieves context
+    documents, generates answers, and stores raw results before evaluation.
+
+complete_evaluation_metrics(cfg_name: str)
+    Computes the evaluation metrics (retrieval, answer quality, semantic) for a
+    given chunking configuration and updates `test_results.json`.
+
+aggregate_results(cfg_name: str)
+    Aggregates mean metric values (hit rate, precision@5, MRR, ROUGE-L,
+    relevance, faithfulness, cosine similarity, BLEU) for the specified
+    configuration and writes them to `aggregated_results.json`.
+
+_calculate_avg_for_each_metric(results: list[dict], metric: str) -> float
+    Utility function for computing per-metric averages across the results of
+    all 25 evaluation questions.
+"""
+
 
 
 def evaluate_config(cfg_name: str):
+    """
+    Runs the RAG pipeline for a given chunking configuration and stores raw
+    results for all 25 test questions before evaluation metrics are applied.
+
+    This function:
+    - Loads the 25-question test dataset.
+    - Builds a RAG chain + retriever using the selected chunk configuration.
+    - Retrieves context documents for each question.
+    - Generates an answer using the RAG chain.
+    - Saves all intermediate results (retrieved docs, contexts, answers,
+      metadata) to `test_results.json`.
+
+    Args:
+        cfg_name (str): The name of the chunking configuration to evaluate.
+                        Must be one of {"small", "medium", "large"}."""
     print(f"- Computing results for all test questions (pre evaluation metrics calculation)...")
     print(f"- chunk config - '{cfg_name.upper()}'")
     cfg_to_use = CHUNK_CONFIGS[cfg_name]
@@ -81,9 +128,21 @@ def evaluate_config(cfg_name: str):
     print(f" - Results for test questions (before evaluation) for config '{cfg_name}' written to '{TEST_RESULTS_PATH.name}'")
 
 def complete_evaluation_metrics(cfg_name: str):
+    """
+    Executes all evaluation metrics for the given chunking configuration and
+    updates the results file with computed metric values.
+
+    This function runs:
+    - Answer quality metrics (ROUGE-L, relevance, faithfulness).
+    - Semantic metrics (cosine similarity, BLEU).
+
+    Results are written back into `test_results.json`.
+
+    Args:
+        cfg_name (str): The chunking configuration to evaluate."""
     print(f"\n- Evaluating chunking strategy - '{cfg_name.upper()}'...")
 
-    calculate_retrieval_metrics(cfg_name=cfg_name)
+    # calculate_retrieval_metrics(cfg_name=cfg_name)
     calculate_answer_quality_metrics(cfg_name=cfg_name)
     calculate_semantic_metrics(cfg_name=cfg_name)
 
@@ -91,6 +150,23 @@ def complete_evaluation_metrics(cfg_name: str):
     print(f"\n- Saved evaluation results for '{cfg_name.upper()}' to 'data/test_results.json'")
 
 def aggregate_results(cfg_name: str):
+    """
+    Computes the average metric values across all 25 questions for the specified
+    chunking configuration and writes the aggregated summary to
+    `aggregated_results.json`.
+
+    Averages computed include:
+    - Hit rate
+    - Precision@5
+    - MRR
+    - ROUGE-L
+    - Answer relevance
+    - Faithfulness
+    - Cosine similarity
+    - BLEU score
+
+    Args:
+        cfg_name (str): The chunking configuration whose metrics should be aggregated."""
     # load aggregated results if they exist
     if AGGREGATED_RESULTS_PATH.exists():
         with open(AGGREGATED_RESULTS_PATH, "r") as f:
@@ -129,6 +205,19 @@ def aggregate_results(cfg_name: str):
     print(f"\n- Saved aggregated metrics for '{cfg_name.upper()}' to 'data/aggregated_results.json'")
 
 def _calculate_avg_for_each_metric(results: list[dict], metric: str) -> float:
+    """
+    Computes the average value of a single metric across all results for one
+    chunking configuration.
+
+    Ignores entries where the metric value is None (e.g., unanswerable questions).
+
+    Args:
+        results (list[dict]): List of per-question evaluation results.
+        metric (str): The metric key to extract from each result dictionary.
+
+    Returns:
+        float: The average value of the metric across all valid entries.
+               Returns 0.0 if no valid entries were found."""
     metric_sum = 0.0
     metric_count = 0.0
     for result_per_question in results:

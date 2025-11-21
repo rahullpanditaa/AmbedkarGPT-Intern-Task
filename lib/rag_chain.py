@@ -7,43 +7,31 @@ from .search.search import SemanticSearch
 # initialize Ollama LLM   
 llm = OllamaLLM(model="mistral")
 
-# def create_rag_chain():
-#     """
-#     Build and return the complete Retrieval-Augmented Generation (RAG) pipeline
-#     using LangChain Runnables, Chroma vector search, HuggingFace embeddings,
-#     and the Ollama Mistral LLM.
-    
-    
-#     Returns
-#     -------
-#     Runnable
-#         A LangChain runnable that accepts a user question (str) and returns
-#         an LLM-generated answer that's grounded in the retrieved context."""    
-
-#     # load or create retriever
-#     searcher = SemanticSearch()
-#     retriever = searcher.load_or_create_vector_db()
-
-#     # runnable that converts list[docs] into a string for llm
-#     doc_combiner = RunnableLambda(combine_docs)
-
-#     # langchain will call each key-value pair with the input question
-#     rag_inputs = {
-#         # context : retrieved docs -> combined into a str
-#         "context": retriever | doc_combiner,
-#         "question": RunnablePassthrough()
-#     }
-
-#     # rag_inputs becomes:
-#     #   "context": "retrieved text chunks merged into a single string"
-#     #   "question": "original question as it is"
-    
-
-#     # context and question -> prompt template -> LLM
-#     rag_chain = rag_inputs | PROMPT | llm
-#     return rag_chain
-
 def create_rag_chain_for_config(config_name: str, chunk_size: int, chunk_overlap: int):
+    """
+    Constructs a fully configured RAG pipeline for a given chunking strategy.
+
+    This function:
+    - Initializes or loads a ChromaDB-based vector store via `SemanticSearch`.
+    - Creates a retriever using the chosen chunk size and overlap.
+    - Builds a LangChain runnable composed of:
+        * document retrieval
+        * context combination via `combine_docs`
+        * insertion into a prompt template
+        * generation via an Ollama-hosted LLM
+    - Returns both the runnable RAG chain and the retriever itself.
+
+    Args:
+        config_name (str): Name of the chunk configuration (e.g. "small",
+            "medium", "large"). Used for selecting a dedicated Chroma directory.
+        chunk_size (int): Size of each text chunk for vectorization.
+        chunk_overlap (int): Overlap between consecutive text chunks.
+
+    Returns:
+        tuple:
+            - rag_chain: A LangChain runnable that takes a question and produces
+                         an answer using retrieval + generation.
+            - retriever: The underlying retriever used to fetch relevant chunks"""
     persist_dir = f"vector_db_{config_name}"
 
     # load or create retriever

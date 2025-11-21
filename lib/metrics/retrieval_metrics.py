@@ -9,25 +9,18 @@ CHUNK_CONFIGS = {
 TEST_RESULTS_PATH = Path(__file__).parent.parent.parent.resolve() / "data" / "test_results.json"
 
 def calculate_retrieval_metrics(cfg_name: str):
-    # results: list[dict] = evaluate_config(cfg_name=config_name.lower(), config=CHUNK_CONFIGS[config_name.lower()])
+    """
+    Computes retrieval quality metrics (Hit Rate, Precision@K, MRR) for all
+    questions under the given chunking configuration and updates
+    `test_results.json` with the new values.
 
-    # if TEST_RESULTS_PATH.exists():
-    #     with open(TEST_RESULTS_PATH, "r") as f:
-    #         previous_test_results = json.load(f)
-    # else:
-    #     previous_test_results = {}
+    Retrieval metrics evaluate how well the retriever selected the correct
+    source documents compared to the expected documents defined in the test
+    dataset.
 
-    # # previous_test_results is either an empty dict
-    # # OR, it is a dict with at least 1 key value pair
-    # # where key=config_name (small, medium, or large)
-    # # value = list[dict] -> results per test_qustion so far
-
-    # if cfg_name in previous_test_results.keys():
-    #     cfg_results_so_far = previous_test_results.get(cfg_name)   
-
-
-    # results_with_retrieval_metrics = []
-
+    Args:
+        cfg_name (str): The name of the chunking configuration to evaluate.
+                        Must be one of {"small", "medium", "large"}."""
     print(f"\n- Calculating Retrieval Quality metrics for chunking config '{cfg_name.upper()}'...")
     if TEST_RESULTS_PATH.exists():
         with open(TEST_RESULTS_PATH, "r") as f:
@@ -71,6 +64,18 @@ def calculate_retrieval_metrics(cfg_name: str):
     print(f"\n- Updated results, saved Retrieval Quality metrics, file at '{TEST_RESULTS_PATH.name}'. ")
 
 def _calculate_hit_rate(expected_sources: list[str], retrieved_sources: list[str]) -> int:
+    """
+    Computes Hit Rate for a single question.
+
+    Hit Rate = 1 if any retrieved document matches any expected document,
+    otherwise 0.
+
+    Args:
+        expected_sources (list[str]): The ground-truth source document filenames.
+        retrieved_sources (list[str]): The filenames returned by the retriever.
+
+    Returns:
+        int: 1 if at least one expected document was retrieved, else 0."""
     if len(retrieved_sources) == 0:
         return 0
     # return 1 if even one match, else 0
@@ -80,6 +85,19 @@ def _calculate_hit_rate(expected_sources: list[str], retrieved_sources: list[str
     return 0
 
 def _calculate_precision_score(expected_sources: list[str], retrieved_sources: list[str]) -> float:
+    """
+    Computes Precision@K for a single question, where K = number of retrieved
+    documents.
+
+    Precision@K = (# relevant retrieved docs) / (# total retrieved docs)
+
+    Args:
+        expected_sources (list[str]): The ground-truth source document filenames.
+        retrieved_sources (list[str]): The filenames returned by the retriever.
+
+    Returns:
+        float: Precision value in the range [0, 1]. Returns 0.0 if no documents
+               were retrieved."""
     if len(retrieved_sources) == 0:
         return 0.0
     # relevant retrieved / total retrieved
@@ -90,6 +108,19 @@ def _calculate_precision_score(expected_sources: list[str], retrieved_sources: l
     return relevant_retrieved / len(retrieved_sources)
 
 def _calculate_mrr(expected_sources: list[str], retrieved_sources: list[str]) -> float:
+    """
+    Computes the Mean Reciprocal Rank (MRR) for a single question.
+
+    MRR = 1 / rank of the first correctly retrieved document, where rank is
+    1-indexed. If no expected document appears in the retrieved list, returns 0.
+
+    Args:
+        expected_sources (list[str]): The ground-truth source document filenames.
+        retrieved_sources (list[str]): The filenames returned by the retriever.
+
+    Returns:
+        float: Reciprocal rank of the first relevant document, or 0.0 if none
+               were retrieved."""
     if len(retrieved_sources) == 0:
         return 0.0
     for i, retrieved in enumerate(retrieved_sources, 1):

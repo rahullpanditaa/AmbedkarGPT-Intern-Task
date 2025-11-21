@@ -15,6 +15,19 @@ CHUNK_CONFIGS = {
 HF_EMBEDDING = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 def calculate_semantic_metrics(cfg_name: str):
+    """
+    Computes semantic similarity metrics (cosine similarity and BLEU score) for
+    all test questions under the specified chunking configuration, and updates
+    the `test_results.json` file with these values.
+
+    Semantic metrics evaluate how close the generated answer is to the ground
+    truth in meaning (cosine similarity via embeddings) and in surface-level
+    n-gram overlap (BLEU score).
+
+    Args:
+        cfg_name (str): The chunking configuration whose semantic metrics should
+            be evaluated. Must be one of {"small", "medium", "large"}."""
+    
     print(f"\n- Calculating Semantic metrics for chunking config '{cfg_name.upper()}'...")
     # Load existing results
     if TEST_RESULTS_PATH.exists():
@@ -23,12 +36,11 @@ def calculate_semantic_metrics(cfg_name: str):
     else:
         all_results = {}
 
-    # Safety check: ensure this config exists
     if cfg_name not in all_results:
         print(f"No base results found for config '{cfg_name}'. Run evaluate_config() first.")
         return
 
-    cfg_results = all_results[cfg_name]   # list of all test question results
+    cfg_results = all_results[cfg_name]
 
     updated_cfg_results = []
 
@@ -46,8 +58,6 @@ def calculate_semantic_metrics(cfg_name: str):
         new_result["bleu_score"] = bleu_score
         updated_cfg_results.append(new_result)
 
-    # updated_results = {}
-    # updated_results[cfg_name] = updated_cfg_results
     all_results[cfg_name] = updated_cfg_results
 
     # save updated results
@@ -58,11 +68,22 @@ def calculate_semantic_metrics(cfg_name: str):
 
 
 def _calculate_cosine_similarity(ground_truth: str, generated_answer: str):
+    """
+    Computes semantic similarity between the ground truth and generated answer
+    using cosine similarity over sentence embeddings.
+
+    Embeddings are computed once using a preloaded HuggingFace model
+    (MiniLM-L6-v2). Cosine similarity captures higher-level semantic closeness.
+
+    Args:
+        ground_truth (str): The expected reference answer.
+        generated_answer (str): The model-generated answer.
+
+    Returns:
+        float: Cosine similarity score in range [-1, 1]. Returns 0.0 if either
+               input text is empty"""
     if ground_truth.strip() == "" or generated_answer.strip() == "":
         return 0.0
-
-    # need to embed both
-    # hf = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
     truth_embedding = HF_EMBEDDING.embed_query(ground_truth)
     answer_embedding = HF_EMBEDDING.embed_query(generated_answer)
@@ -72,6 +93,20 @@ def _calculate_cosine_similarity(ground_truth: str, generated_answer: str):
 
 # n-gram overlap i.e. 
 def _calculate_bleu_score(ground_truth: str, generated_answer: str):
+    """
+    Computes the BLEU score (n-gram precision-based metric) between the ground
+    truth and generated answer.
+
+    BLEU evaluates surface-level similarity in phrasing and word choice.
+    A smoothing function is applied to avoid zero scores on short sequences.
+
+    Args:
+        ground_truth (str): The expected reference answer.
+        generated_answer (str): The model-generated answer.
+
+    Returns:
+        float: BLEU score in range [0, 1]. Returns 0.0 if either input text is
+               empty."""
     if ground_truth.strip() == "" or generated_answer.strip() == "":
         return 0.0
     

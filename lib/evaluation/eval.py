@@ -45,11 +45,12 @@ def evaluate_config(cfg_name):
             Path(doc.metadata.get("source", "unknown")).name
             for doc in retrieved_docs
         ]
+        # retrieved_source_names = list(set(retrieved_source_names))
 
         # generate an answer to test question
         answer = rag_chain.invoke(question)
 
-        time.sleep(3.0)
+        time.sleep(5.0)
 
         results.append({
             "id": q["id"],
